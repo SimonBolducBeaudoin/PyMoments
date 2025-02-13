@@ -1,5 +1,5 @@
 # This is a Fork
-This is a fork of PyMoments which can be found at [source](https://github.com/KevinDalySmith/PyMoments).
+This is a fork of PyMoments which can be found at [their original GiHub](https://github.com/KevinDalySmith/PyMoments).
 See their installation steps below.
 I plan on adding a few improvements to the librarie (by order of priorities).
     - A cumulants_to_moment function which will give the polynomial representation of a given multivariate moment interm of cumulants   
