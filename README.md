@@ -2,13 +2,13 @@
 This is a fork of PyMoments which can be found at [their original GiHub](https://github.com/KevinDalySmith/PyMoments).
 See their installation steps below.
 I plan on adding a few improvements to the librarie (by order of priorities).
-    - A cumulants_to_moment function which will give the polynomial representation of a given multivariate moment interm of cumulants   
-    - A moments_to_cumulant 
-    - A cumulants_to_mu (aka cumulants_to_central_moments)
-    - A mus_to_cumulant 
-    - A function that outputs latex code for each of the above functions to help with visualisation/papers writting
-    - A implementation for biaised (straitfoward implementation) and un-biaised computing of k-stats and h-stats from histograms.
-    - An efficient C/C++ or Numba or Cuda implementation for the whole librarie.
+- A cumulants_to_moment function which will give the polynomial representation of a given multivariate moment interm of cumulants   
+- A moments_to_cumulant 
+- A cumulants_to_mu (aka cumulants_to_central_moments)
+- A mus_to_cumulant 
+- A function that outputs latex code for each of the above functions to help with visualisation/papers writting
+- A implementation for biaised (straitfoward implementation) and un-biaised computing of k-stats and h-stats from histograms.
+- An efficient C/C++ or Numba or Cuda implementation for the whole librarie.
 
 # PyMoments
 
