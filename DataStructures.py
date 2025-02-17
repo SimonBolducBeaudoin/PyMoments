@@ -31,6 +31,26 @@ def partition_of_multi_indices(multiset,N_of_var=None):
             idx_tpl += (tpl.count(i),)
         mlt_idx += [idx_tpl,]
     return mlt_idx
+    
+def multi_idxs_to_multiset(multi_idxs):
+    """
+    Converts a multi index into a multisets
+    See K.D. Smith's paper "A Tutorial on Multivariate k-statistics ..." for definitions
+    
+    Parameters
+    ----------
+    multi_idxs : tuple
+    
+    Ex: 
+        In the 1D case the multi indices for <x^2> is (2,)  and the multiset is       (0,0)
+        In the 2D case the multi indices for <x^2> is (2,0) and the multiset is still (0,0)
+                       the multi indices for <xy>  is (1,1) and the multiset is still (0,1)
+    """
+    mltset = ()
+    for i,idx in enumerate(multi_idxs) :
+        for j in range(idx):
+            mltset += (i,)
+    return mltset
 
 class IntPartitionTree:
     """
