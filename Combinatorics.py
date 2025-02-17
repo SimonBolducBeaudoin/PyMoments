@@ -3,6 +3,7 @@ Combinatorics.py
 Module of combinatorics-related generators and methods.
 """
 
+from math import factorial
 
 def simplex_iter(s, max_vals):
     """
@@ -92,23 +93,6 @@ def ff(n, i):
         return n
     else:
         return n * ff(n-1, i-1)
-
-
-def factorial(n):
-    """
-    Computes the factorial n!
-
-    Parameters
-    ----------
-    n : int
-        Argument to the factorial.
-
-    Returns
-    -------
-    f : int
-        Factorial n!
-    """
-    return ff(n, n-1)
 
 
 def binom(n, k):
