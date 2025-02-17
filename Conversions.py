@@ -65,15 +65,13 @@ class _to_centered_moment(_conversion_base):
                           
 class cumulants_to_moment(_to_moment):
     """
-    An iterator that expresses a given moment in terms of cumulants.
-
     This class implements Equation (1.3) from K.D. Smith:
 
     .. math::
         m_{[i_1, i_2, \dots, i_k]} = \sum_{\pi \in \Pi_k} \prod_{B \in \pi} \kappa_{[i_j | j \in B]}
 
-    where the moment is represented as a sum over set partitions of indices,
-    with products of cumulants corresponding to each partition block.
+    By default, calling this class returns a full list of terms representing the moment.
+    If `as_iterator=True` is passed, it behaves as an iterator and yields terms one by one.
 
     Parameters
     ----------
@@ -86,29 +84,36 @@ class cumulants_to_moment(_to_moment):
         <X_1^2>=<X_1 X_1> = is (1,1)
                 <X_0 X_1> = is (0,1)
                 <X_0 X_1 X_0> = is (0,1,0) or (0,0,1) is equivalent
+    as_iterator : bool, optional
+        If True, returns an iterator instead of a full list. Default is False.
 
-    Yields
-    ------
-    list
-        A list containing a coefficient (always 1) followed by tuples representing
-        cumulant terms. Each element of the returned list are to be multiplied together 
-        in order to get a term of the moment to be computed.
+    Returns
+    -------
+    list or iterator
+        If `as_iterator=False` (default), returns a list where each element represents a term
+        of the expansion. Each term is a list containing a coefficient (always 1) followed by tuples
+        representing cumulant terms.
+        If `as_iterator=True`, returns an iterator that yields terms one by one.
 
     Examples
     --------
     The second cumulant is the covariance:
 
     .. math::
-        <X_i X_j> = k_{i,j} + k_{i}*k_{j}
+        <X_i X_j> = \kappa_{i,j} + \kappa_{i} \kappa_{j}
 
     Example usage:
 
     >>> i, j = 0, 1
-    >>> it = cumulants_to_moment((0,1))
+    >>> terms = cumulants_to_moment((0,1))
+    >>> print(terms)
+    [[1, (0,1)], [1, (0,), (1,)]]
+
+    >>> it = cumulants_to_moment((0,1), as_iterator=True)
     >>> next(it)
-    [1, (0,1)]   # 1*k_{0,1}
+    [1, (0,1)]
     >>> next(it)
-    [1, (0,), (1,)]   # 1*k_{0}*k_{0}
+    [1, (0,), (1,)]
     """
     def next_term(self):
         return [1] + next(self.gen)
@@ -126,49 +131,55 @@ class cumulants_to_mu(_to_centered_moment):
                 
 class moments_to_cumulant(_to_moment):
     """
-    An iterator that expresses a given cumulant in terms of moments.
-
     This class implements Equation (1.6) from K.D. Smith:
 
     .. math::
         \kappa_{[i_1, i_2, \dots, i_k]} = \sum_{\pi \in \Pi_k} (-1)^{|\pi| - 1} (|\pi| - 1)! \prod_{B \in \pi} m_{[i_j \mid j \in B]}
-    where the cumulant is represented as a sum over set partitions of indices,
-    with products of moments corresponding to each partition block.
+
+    By default, calling this class returns a full list of terms representing the cumulant.
+    If `as_iterator=True` is passed, it behaves as an iterator and yields terms one by one.
 
     Parameters
     ----------
     multiset : list of tuples
-        A multiset (a set that allows repetitions) representing the moment
-        to be computed from cumulants. Each tuple corresponds to a random
+        A multiset (a set that allows repetitions) representing the cumulant
+        to be computed from moments. Each tuple corresponds to a random
         variable's index. Examples:
 
         <k_{2,0}> = is (0,0)
         <k_{0,2}> = is (1,1)
         <k_{1,1}> = is (0,1)
         <k_{2,1}> = is (0,1,0) or (0,0,1) is equivalent
+    as_iterator : bool, optional
+        If True, returns an iterator instead of a full list. Default is False.
 
-    Yields
-    ------
-    list
-        A list containing a coefficient followed by tuples representing
-        moment terms. Each element of the returned list are to be multiplied 
-        together in order to get a term of the cumulant to be computed.
+    Returns
+    -------
+    list or iterator
+        If `as_iterator=False` (default), returns a list where each element represents a term
+        of the expansion. Each term is a list containing a coefficient followed by tuples
+        representing moment terms.
+        If `as_iterator=True`, returns an iterator that yields terms one by one.
 
     Examples
     --------
     The second cumulant is the covariance:
 
     .. math::
-        k_{i,j} = <X_i X_j> - <X_i><X_j>
+        \kappa_{i,j} = <X_i X_j> - <X_i><X_j>
 
     Example usage:
 
     >>> i, j = 0, 1
-    >>> it = moments_to_cumulant((0,1))
+    >>> terms = moments_to_cumulant((0,1))
+    >>> print(terms)
+    [[1, (0,1)], [-1, (0,), (1,)]]
+
+    >>> it = moments_to_cumulant((0,1), as_iterator=True)
     >>> next(it)
-    [1 , (0,1)]      #  1*<X_0 X_1>
+    [1, (0,1)]
     >>> next(it)
-    [-1, (0,), (1,)] # -1*<X_0><X_1>
+    [-1, (0,), (1,)]
     """
     
     def next_term(self):
