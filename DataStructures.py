@@ -3,6 +3,34 @@ DataStructures.py
 Module of custom data structures for statistics computation.
 """
 
+def partition_of_multi_indices(multiset,N_of_var=None):
+    """
+    Converts a partition of multisets into a partition of multi index
+    See K.D. Smith's paper "A Tutorial on Multivariate k-statistics ..." for definitions
+    
+    Parameters
+    ----------
+    multiset : list of tuples
+    N_of_var : int
+        The number of variables to be used in the multi index representation
+        Ex: 
+            In a multiset representation 
+                <x^2> is (0,0)  , <xy> is (0,1)   and <y^2> is (1,1)
+            Their equivalent in a multi-indices representation are
+                <x^2> is (2,0)  , <xy> is (1,1)   and <y^2> is (0,2)
+            If N_of_var = 3 then the multi-indices representation are
+                <x^2> is (2,0,0), <xy> is (1,1,0) and <y^2> is (0,2,0)
+    """
+    if N_of_var is None :
+        m = 0
+        N_of_var = max([max(tpl) for tpl in multiset]) + 1
+    mlt_idx = []
+    for tpl in multiset :
+        idx_tpl=()
+        for i in range(N_of_var):
+            idx_tpl += (tpl.count(i),)
+        mlt_idx += [idx_tpl,]
+    return mlt_idx
 
 class IntPartitionTree:
     """
