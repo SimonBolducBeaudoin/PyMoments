@@ -64,7 +64,30 @@ def set_partitions(set):
                 new_part = (head,) + part
                 yield tail_parts[:i] + [new_part] + tail_parts[i + 1:]
             yield [(head,)] + tail_parts
+            
+class mu_partitions:
+    def __init__(self, set):
+        self.gen = set_partitions(set)
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # looking for either the generator to end or 
+        # the next list of tuple with no
+        while True :
+            this_tpl_good = True
+            nxt = next(self.gen)
+            if nxt is None:
+                raise StopIteration
+            # checks if one of the elements has lenght 1.
+            for idx_tpl in nxt :
+                if len(idx_tpl)==1 :
+                    this_tpl_good = False
+                    break
+            if this_tpl_good : 
+                break 
+        return nxt
 
 def ff(n, i):
     """
