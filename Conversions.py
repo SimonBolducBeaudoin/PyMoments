@@ -6,6 +6,13 @@ from .DataStructures import partition_of_multi_indices
 from math import factorial
 
 class _conversion_base:
+    def __new__(cls, *args, as_iterator=False, **kwargs):
+        """Decides whether to return an iterator or a list."""
+        instance = super().__new__(cls)  # Create instance normally
+        instance.__init__(*args, **kwargs)  # Explicitly call __init__
+        if as_iterator:
+            return instance  # Return the iterator
+        return list(instance)  # Collect all elements into a list
     def __init__(self,LaTex=False,multi_index=False):
         self._LaTex=LaTex
         self._multi_index=multi_index
