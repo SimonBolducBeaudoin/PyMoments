@@ -13,9 +13,10 @@ class _conversion_base:
         if as_iterator:
             return instance  # Return the iterator
         return list(instance)  # Collect all elements into a list
-    def __init__(self,LaTex=False,multi_index=False):
+    def __init__(self,multiset,LaTex=False,multi_index_out=False):
+        self.multiset_in = multiset
         self._LaTex=LaTex
-        self._multi_index=multi_index
+        self._multi_index=multi_index_out
     def __iter__(self):
         return self
     def _next_term_frmt(self):
@@ -53,14 +54,14 @@ class _conversion_base:
         return s
 
 class _to_moment(_conversion_base):
-    def __init__(self, multiset,LaTex=False,multi_index=False):
-        self.gen = set_partitions(multiset)
-        super().__init__(LaTex=LaTex,multi_index=multi_index)
+    def __init__(self, *args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.gen = set_partitions(self.multiset_in)
         
 class _to_centered_moment(_conversion_base):
-    def __init__(self, multiset,LaTex=False,multi_index=False):
-        self.gen = mu_partitions(multiset)
-        super().__init__(LaTex=LaTex,multi_index=multi_index)
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.gen = mu_partitions(self.multiset_in)
                           
 class cumulants_to_moment(_to_moment):
     """
