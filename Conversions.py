@@ -2,7 +2,7 @@
 #! -*- coding: utf-8 -*-
 
 from .Combinatorics import set_partitions, mu_partitions
-from .DataStructures import partition_of_multi_indices
+from .DataStructures import partition_of_multi_indices,multi_idxs_to_multiset
 from math import factorial
 
 class _conversion_base:
@@ -13,8 +13,8 @@ class _conversion_base:
         if as_iterator:
             return instance  # Return the iterator
         return list(instance)  # Collect all elements into a list
-    def __init__(self,multiset,LaTex=False,multi_index_out=False):
-        self.multiset_in = multiset
+    def __init__(self,multiset,LaTex=False,multi_index_in=False,multi_index_out=False):
+        self.multiset_in = multiset if not(multi_index_in) else multi_idxs_to_multiset(multiset)
         self._LaTex=LaTex
         self._multi_index=multi_index_out
     def __iter__(self):
