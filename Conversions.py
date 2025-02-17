@@ -2,23 +2,33 @@
 #! -*- coding: utf-8 -*-
 
 from .Combinatorics import set_partitions, mu_partitions
+from .DataStructures import partition_of_multi_indices
 from math import factorial
 
 class _conversion_base:
-    def __init__(self,LaTex=False):
-        if LaTex :
-            self._next_ = self.next_term_latex
-        else :
-            self._next_ = self.next_term
+    def __init__(self,LaTex=False,multi_index=False):
+        self._LaTex=LaTex
+        self._multi_index=multi_index
     def __iter__(self):
         return self
+    def _next_term_frmt(self):
+        if self._multi_index :
+            nxt = self.next_term()
+            coef = nxt[0]
+            mltset = partition_of_multi_indices(nxt[1:])
+            return [coef,mltset]
+        else :
+            return self.next_term()
     def next_term_latex(self,var="x"):
-        nxt = self.next_term()
+        nxt = self._next_term_frmt()
         return _conversion_base.term_to_latex(nxt,var=var)
     def next_term(self):
         raise StopIteration
     def __next__(self):
-        return self._next_()
+        if self._LaTex :
+            return self.next_term_latex()
+        else :
+            return self._next_term_frmt()
     @staticmethod
     def term_to_latex(list_of_prod,var="x"):
         coef = list_of_prod[0]
@@ -36,14 +46,14 @@ class _conversion_base:
         return s
 
 class _to_moment(_conversion_base):
-    def __init__(self, multiset,LaTex=False):
+    def __init__(self, multiset,LaTex=False,multi_index=False):
         self.gen = set_partitions(multiset)
-        super().__init__(LaTex=LaTex)
+        super().__init__(LaTex=LaTex,multi_index=multi_index)
         
 class _to_centered_moment(_conversion_base):
-    def __init__(self, multiset,LaTex=False):
+    def __init__(self, multiset,LaTex=False,multi_index=False):
         self.gen = mu_partitions(multiset)
-        super().__init__(LaTex=LaTex)
+        super().__init__(LaTex=LaTex,multi_index=multi_index)
                           
 class cumulants_to_moment(_to_moment):
     """
