@@ -9,11 +9,12 @@ class _conversion_base:
     def __new__(cls, *args, as_iterator=False, **kwargs):
         """Decides whether to return an iterator or a list."""
         instance = super().__new__(cls)  # Create instance normally
-        instance.__init__(*args, **kwargs)  # Explicitly call __init__
         if as_iterator:
             return instance  # Return the iterator
-        return list(instance)  # Collect all elements into a list
-    def __init__(self,multiset,LaTex=False,multi_index_in=False,multi_index_out=False):
+        else :
+            instance.__init__(*args, **kwargs)  # Explicitly call __init__
+            return list(instance)  # Collect all elements into a list
+    def __init__(self,multiset,LaTex=False,multi_index_in=False,multi_index_out=False,**kwargs):
         self.multiset_in = multiset if not(multi_index_in) else multi_idxs_to_multiset(multiset)
         self._LaTex=LaTex
         self._multi_index=multi_index_out
