@@ -1,9 +1,18 @@
+#!/bin/env/python
+#! -*- coding: utf-8 -*-
+
 from unittest import TestCase
-from PyMoments.Moments import *
-from PyMoments.DataStructures import IntPartitionTree
+import numpy as np
+
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from Moments import kstat_coef,kstat
+from DataStructures import IntPartitionTree
+
 from numpy.testing import assert_array_almost_equal
 import os.path
-
 
 class TestMoments(TestCase):
 

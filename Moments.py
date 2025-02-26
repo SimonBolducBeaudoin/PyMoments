@@ -4,8 +4,8 @@ Key functions and helper functions for computing moment statistics.
 """
 
 import numpy as np
-from .Combinatorics import *
-from .DataStructures import *
+from Combinatorics import *
+from DataStructures import *
 
 
 def kstat(data, modes, sample_axis=0, variable_axis=1, coef_tree=None):

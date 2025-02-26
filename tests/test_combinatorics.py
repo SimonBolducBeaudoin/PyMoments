@@ -1,6 +1,13 @@
-from unittest import TestCase
-from PyMoments.Combinatorics import *
+#!/bin/env/python
+#! -*- coding: utf-8 -*-
 
+from unittest import TestCase
+
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from Combinatorics import simplex_iter,set_partitions
 
 class TestCombinatorics(TestCase):
 

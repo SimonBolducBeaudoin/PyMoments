@@ -1,5 +1,14 @@
+#!/bin/env/python
+#! -*- coding: utf-8 -*-
+
 from unittest import TestCase
-from PyMoments.DataStructures import IntPartitionTree
+
+
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from DataStructures import IntPartitionTree
 
 
 class TestIntPartitionTree(TestCase):
