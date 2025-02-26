@@ -5,6 +5,27 @@ Module of combinatorics-related generators and methods.
 
 from math import factorial
 
+def integer_partitions(n, min_value=1, max_value=None):
+    """
+    Generate all partitions of n where each part is at least min_value.
+    
+    Parameters:
+    - n: the integer to partition.
+    - min_value: the minimum allowed value for any part (default is 1).
+    - max_value: the maximum allowed value for the next part (default is n).
+    
+    The partitions are yielded in non-increasing order.
+    """
+    if max_value is None:
+        max_value = n
+    if n == 0:
+        yield []
+        return
+    # Only consider values i that are between min_value and min(n, max_value)
+    for i in range(min(n, max_value), min_value - 1, -1):
+        for partition in integer_partitions(n - i, min_value, i):
+            yield [i] + partition
+
 def simplex_iter(s, max_vals):
     """
     Generator over all tuples of integers (i1, i2, ..., id) with the following properties:
