@@ -37,6 +37,12 @@ class TestIntegerPartitions(unittest.TestCase):
         # Order is not important so we compare sorted lists.
         self.assertEqual(sorted(partitions), sorted(expected))
 
+    def test_eleven_default(self):
+        """Test partitions of 11 with default min_value=1."""
+        partitions = list(integer_partitions(11))
+        expected_count = 56  # There are 56 partitions of 11
+        self.assertEqual(len(partitions), expected_count)
+
     def test_five_min_value_2(self):
         """Test partitions of 5 with parts not smaller than 2."""
         partitions = list(integer_partitions(5, min_value=2))
@@ -45,7 +51,7 @@ class TestIntegerPartitions(unittest.TestCase):
             [3, 2]
         ]
         self.assertEqual(sorted(partitions), sorted(expected))
-        
+    
     def test_five_max_value_3(self):
         """Test partitions of 5 with parts not larger than 3."""
         partitions = list(integer_partitions(5, max_value=3))
@@ -55,6 +61,14 @@ class TestIntegerPartitions(unittest.TestCase):
             [2, 2, 1],
             [2, 1, 1, 1],
             [1, 1, 1, 1, 1]
+        ]
+        self.assertEqual(sorted(partitions), sorted(expected))
+        
+    def test_eleven_max_value_5(self):
+        """Test partitions of 11 with parts not larger than 5."""
+        partitions = list(integer_partitions(11, max_value=5,min_value=2))
+        expected = [
+            [5,4,2],[5,3,3],[5,2,2,2],[4,4,3],[4,3,2,2],[3,3,3,2],[3,2,2,2,2]
         ]
         self.assertEqual(sorted(partitions), sorted(expected))
 
