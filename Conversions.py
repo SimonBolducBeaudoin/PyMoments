@@ -1,8 +1,8 @@
 #!/bin/env/python
 #! -*- coding: utf-8 -*-
 
-from .Combinatorics import set_partitions, mu_partitions
-from .DataStructures import partition_of_multi_indices,multi_idxs_to_multiset
+from Combinatorics import set_partitions, mu_partitions
+from DataStructures import partition_of_multi_indices,multi_idxs_to_multiset
 from math import factorial
 
 class _conversion_base:
