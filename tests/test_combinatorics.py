@@ -1,15 +1,11 @@
 #!/bin/env/python
 #! -*- coding: utf-8 -*-
 
-from unittest import TestCase
+import unittest
 
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from PyMoments.Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff,binom
 
-from Combinatorics import simplex_iter,set_partitions
-
-class TestCombinatorics(TestCase):
+class TestCombinatorics(unittest.TestCase):
 
     def test_simplex_iter(self):
 
@@ -105,12 +101,6 @@ class TestCombinatorics(TestCase):
                 self.assertEqual(ff(n, i), ff_true)
                 ff_true *= (n - i)
 
-    def test_factorial(self):
-
-        facts = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880]
-        for n in range(10):
-            self.assertEqual(factorial(n), facts[n])
-
     def test_binom(self):
 
         # First 5 rows of Pascal's triangle
@@ -136,3 +126,116 @@ class TestCombinatorics(TestCase):
         self.assertEqual(binom(8, 2), 28)
         self.assertEqual(binom(8, 4), 70)
         self.assertEqual(binom(20, 14), 38760)
+
+class TestIntegerPartitions(unittest.TestCase):
+    def test_zero(self):
+        """The only partition of 0 should be the empty partition."""
+        partitions = list(integer_partitions(0))
+        self.assertEqual(partitions, [[]])
+
+    def test_one(self):
+        """Partitioning 1 should produce only [[1]]."""
+        partitions = list(integer_partitions(1))
+        self.assertEqual(partitions, [[1]])
+
+    def test_five_default(self):
+        """Test partitions of 5 with default min_value=1."""
+        partitions = list(integer_partitions(5))
+        expected = [
+            [5],
+            [4, 1],
+            [3, 2],
+            [3, 1, 1],
+            [2, 2, 1],
+            [2, 1, 1, 1],
+            [1, 1, 1, 1, 1]
+        ]
+        # Order is not important so we compare sorted lists.
+        self.assertEqual(sorted(partitions), sorted(expected))
+
+    def test_eleven_default(self):
+        """Test partitions of 11 with default min_value=1."""
+        partitions = list(integer_partitions(11))
+        expected_count = 56  # There are 56 partitions of 11
+        self.assertEqual(len(partitions), expected_count)
+
+    def test_five_min_value_2(self):
+        """Test partitions of 5 with parts not smaller than 2."""
+        partitions = list(integer_partitions(5, min_value=2))
+        expected = [
+            [5],
+            [3, 2]
+        ]
+        self.assertEqual(sorted(partitions), sorted(expected))
+    
+    def test_five_max_value_3(self):
+        """Test partitions of 5 with parts not larger than 3."""
+        partitions = list(integer_partitions(5, max_value=3))
+        expected = [
+            [3, 2],
+            [3, 1, 1],
+            [2, 2, 1],
+            [2, 1, 1, 1],
+            [1, 1, 1, 1, 1]
+        ]
+        self.assertEqual(sorted(partitions), sorted(expected))
+        
+    def test_eleven_max_value_5(self):
+        """Test partitions of 11 with parts not larger than 5."""
+        partitions = list(integer_partitions(11, max_value=5,min_value=2))
+        expected = [
+            [5,4,2],[5,3,3],[5,2,2,2],[4,4,3],[4,3,2,2],[3,3,3,2],[3,2,2,2,2]
+        ]
+        self.assertEqual(sorted(partitions), sorted(expected))
+
+    def test_five_min_2_max_3(self):
+        """Test partitions of 5 with parts between 2 and 3 (inclusive)."""
+        partitions = list(integer_partitions(5, min_value=2, max_value=3))
+        expected = [
+            [3, 2]
+        ]
+        self.assertEqual(sorted(partitions), sorted(expected))
+            
+    def test_non_increasing_order(self):
+        """Ensure that each partition is in non-increasing order."""
+        partitions = list(integer_partitions(5))
+        for partition in partitions:
+            with self.subTest(partition=partition):
+                self.assertTrue(all(partition[i] >= partition[i+1] for i in range(len(partition)-1)),
+                                f"{partition} is not in non-increasing order")
+
+class TestMuPartitions(unittest.TestCase):
+    def test_empty_set(self):
+        """mu_partitions should return nothing for an empty set."""
+        partitions = list(mu_partitions([]))
+        self.assertEqual(partitions, [])
+
+    def test_single_element(self):
+        """mu_partitions should return nothing for a single-element set."""
+        partitions = list(mu_partitions(["A"]))
+        self.assertEqual(partitions, [])
+
+    def test_two_elements(self):
+        """mu_partitions should return a single partition: both elements together."""
+        partitions = list(mu_partitions(["A", "B"]))
+        expected = [[["A", "B"]]]  # Example expected output (assuming binary representation)
+        self.assertEqual(partitions, expected)
+
+    def test_three_elements(self):
+        """mu_partitions should remove partitions that contain singletons."""
+        partitions = list(mu_partitions(["A", "B", "C"]))
+        expected=[[['A', 'B', 'C']]]
+        self.assertEqual(partitions, expected)
+
+    def test_four_elements(self):
+        """mu_partitions should generate correct partitions for four elements."""
+        partitions = list(mu_partitions(["A", "B", "C", "D"]))
+        # Check that none of the partitions contain singleton blocks
+        expected = [[['A', 'B', 'C', 'D']],
+        [['A', 'B'], ['C', 'D']],
+        [['A', 'C'], ['B', 'D']],
+        [['A', 'D'], ['B', 'C']]]
+        self.assertEqual(partitions, expected)
+
+if __name__ == '__main__':
+    unittest.main()

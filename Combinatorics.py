@@ -4,6 +4,10 @@ Module of combinatorics-related generators and methods.
 """
 
 from math import factorial
+from more_itertools import distinct_permutations
+from numpy import r_,zeros,full
+
+from .DataStructures import growth_string_to_partition
 
 def integer_partitions(n, min_value=1, max_value=None):
     """
@@ -15,7 +19,7 @@ def integer_partitions(n, min_value=1, max_value=None):
     - max_value: the maximum allowed value for the next part (default is n).
     
     The partitions are yielded in non-increasing order.
-    """
+    """ 
     if max_value is None:
         max_value = n
     if n == 0:

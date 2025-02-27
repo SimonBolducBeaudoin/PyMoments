@@ -4,12 +4,8 @@
 from unittest import TestCase
 import numpy as np
 
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from Moments import kstat_coef,kstat
-from DataStructures import IntPartitionTree
+from PyMoments.Moments import kstat_coef,kstat
+from PyMoments.DataStructures import IntPartitionTree
 
 from numpy.testing import assert_array_almost_equal
 import os.path
@@ -102,3 +98,6 @@ class TestMoments(TestCase):
         self.assertAlmostEqual(kstat_coef(10, [2, 2]), -1/56)
         self.assertAlmostEqual(kstat_coef(4, [1, 3]), -5/6)
         self.assertAlmostEqual(kstat_coef(10, [1, 3]), -11/(9*8*7))
+        
+if __name__ == '__main__':
+    unittest.main()

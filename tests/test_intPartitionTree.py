@@ -1,17 +1,11 @@
 #!/bin/env/python
 #! -*- coding: utf-8 -*-
 
-from unittest import TestCase
+import unittest
 
+from PyMoments.DataStructures import IntPartitionTree
 
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from DataStructures import IntPartitionTree
-
-
-class TestIntPartitionTree(TestCase):
+class TestIntPartitionTree(unittest.TestCase):
 
     def setUp(self):
 
@@ -57,3 +51,6 @@ class TestIntPartitionTree(TestCase):
 
     def test_depth(self):
         self.assertEqual(self.T1.depth(), 5)
+        
+if __name__ == '__main__':
+    unittest.main()        
