@@ -190,12 +190,13 @@ class growth_string_from_blocks_shape:
         
     def __next__(self):
         if self._first_call_ :
+            if not self.set :
+                return []
             self._init_from_(0)
             self._first_call_ = False
             return self.GS
         else :
             for i,(it,idx) in enumerate(zip(self.it[::-1],self.GS_idx[::-1])) :
-                #pdb.set_trace()
                 i += 1
                 self.available[[*idx]] = True
                 del self.GS_idx[-1]
