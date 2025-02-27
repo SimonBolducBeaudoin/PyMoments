@@ -4,8 +4,17 @@
 from unittest import TestCase
 import numpy as np
 
-from PyMoments.Moments import kstat_coef,kstat
-from PyMoments.DataStructures import IntPartitionTree
+try : # Absolute import
+    # Works with calling 
+    # python -m unittest discover -s PyMoments/tests -p "test_*.py
+    # From PyMoments's parent directorie
+    from PyMoments.Moments import kstat_coef,kstat
+    from PyMoments.DataStructures import IntPartitionTree
+except ModuleNotFoundError : # Relative import
+    # Works with 
+    # pytest PyMoments/tests
+    from ..Moments import kstat_coef,kstat
+    from ..DataStructures import IntPartitionTree
 
 from numpy.testing import assert_array_almost_equal
 import os.path

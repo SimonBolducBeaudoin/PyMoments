@@ -3,8 +3,16 @@
 
 import unittest
 
-from PyMoments.DataStructures import IntPartitionTree
-
+try : # Absolute import
+    # Works with calling 
+    # python -m unittest discover -s PyMoments/tests -p "test_*.py
+    # From PyMoments's parent directorie
+    from PyMoments.DataStructures import IntPartitionTree
+except ModuleNotFoundError : # Relative import
+    # Works with 
+    # pytest PyMoments/tests
+    from ..DataStructures import IntPartitionTree
+    
 class TestIntPartitionTree(unittest.TestCase):
 
     def setUp(self):

@@ -3,7 +3,15 @@
 
 import unittest
 
-from PyMoments.Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff,binom
+try : # Absolute import
+    # Works with calling 
+    # python -m unittest discover -s PyMoments/tests -p "test_*.py
+    # From PyMoments's parent directorie
+    from PyMoments.Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff,binom
+except ModuleNotFoundError : # Relative import
+    # Works with 
+    # pytest PyMoments/tests
+    from ..Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff,binom
 
 class TestCombinatorics(unittest.TestCase):
 

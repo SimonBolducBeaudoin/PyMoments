@@ -11,7 +11,12 @@ I plan on adding a few improvements to the librarie (by order of priorities).
 - An efficient C/C++ or Numba or Cuda implementation for the whole librarie.
 
 # Running tests
-Go into the parent directory of PyMoments and run.
+Go into the parent directory of PyMoments and run. 
+Using pytest
+```
+$ pytest PyMoments/tests
+```
+Or
 ```
 $ python -m unittest discover -s tests -p "test_*.py"
 ```
