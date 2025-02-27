@@ -10,6 +10,12 @@ I plan on adding a few improvements to the librarie (by order of priorities).
 - A implementation for biaised (straitfoward implementation) and un-biaised computing of k-stats and h-stats from histograms.
 - An efficient C/C++ or Numba or Cuda implementation for the whole librarie.
 
+# Running tests
+Go into the parent directory of PyMoments and run.
+```
+$ python -m unittest discover -s tests -p "test_*.py"
+```
+
 # PyMoments
 
 PyMoments is a toolkit for unbiased estimation of multivariate statistical moments. 
