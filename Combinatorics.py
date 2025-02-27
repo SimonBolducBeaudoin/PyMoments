@@ -86,31 +86,27 @@ def set_partitions(set):
                 yield tail_parts[:i] + [new_part] + tail_parts[i + 1:]
             yield [(head,)] + tail_parts
             
-class mu_partitions:
-    def __init__(self, set):
-        self.gen = set_partitions(set)
+def mu_partitions(set):
+    """
+    Returns partitions for centered moments 
+    A.k.a. removes all set partition with a block of size 1.
+    
+    It works by :
+    1. Generating an iterator if the integer partitions.
+    2. Getting distinct permutations of each integer partition.
+    3. Producing growth strings based on the permutations.
+    4. Converting the growth strings to the corresponding elements of the set.
 
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        # looking for either the generator to end or 
-        # the next list of tuple with no
-        while True :
-            this_tpl_good = True
-            nxt = next(self.gen)
-            if nxt is None:
-                raise StopIteration
-            # checks if one of the elements has lenght 1.
-            for idx_tpl in nxt :
-                if len(idx_tpl)==1 :
-                    this_tpl_good = False
-                    break
-            if this_tpl_good : 
-                break 
-        return nxt
-        
-
+    Yields:
+        - Each element of the partitions for centered moments .
+    """
+    if not set :
+        return 
+    for int_partition in integer_partitions(len(set), 2):
+        for block_shape in distinct_permutations(int_partition):
+           for gs in growth_string_from_blocks_shape(block_shape, set):
+               yield growth_string_to_partition(gs,set)
+            
 def retricted_combinations(iterable, r):
     """
     Very similar to itertools.combinations.
