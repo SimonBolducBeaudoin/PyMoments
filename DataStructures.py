@@ -3,6 +3,14 @@ DataStructures.py
 Module of custom data structures for statistics computation.
 """
 
+def growth_string_to_partition(growth_string,set):
+    ret = []
+    for i in range(max(growth_string)+1):
+        ret += [[]]
+    for idx,elem in zip(growth_string,set) :
+        ret[idx] += [elem]
+    return ret
+
 def partition_of_multi_indices(multiset,N_of_var=None):
     """
     Converts a partition of multisets into a partition of multi index
