@@ -8,10 +8,12 @@ try : # Absolute import
     # python -m unittest discover -s PyMoments/tests -p "test_*.py
     # From PyMoments's parent directorie
     from PyMoments.Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff,binom
+    from PyMoments.Combinatorics import fuse_sublists,list_disjoint_product,generate_fused_combinations,list_conjoint_product
 except ModuleNotFoundError : # Relative import
     # Works with 
     # pytest PyMoments/tests
     from ..Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff,binom
+    from ..Combinatorics import fuse_sublists,list_disjoint_product,generate_fused_combinations,list_conjoint_product
 
 class TestCombinatorics(unittest.TestCase):
 
@@ -245,5 +247,126 @@ class TestMuPartitions(unittest.TestCase):
         [['A', 'D'], ['B', 'C']]]
         self.assertEqual(partitions, expected)
 
+class TestFuseSublists(unittest.TestCase):
+    def test_basic_fusion(self):
+        self.assertEqual(fuse_sublists(('a', 'b'), ('c', 'd')), ('a', 'b', 'c', 'd'))
+
+    def test_fusion_with_duplicates(self):
+        self.assertEqual(fuse_sublists(('a', 'b', 'a'), ('b', 'a', 'c')), ('a', 'a', 'a', 'b', 'b', 'c'))
+
+    def test_fusion_with_empty_sublist(self):
+        self.assertEqual(fuse_sublists((), ('x', 'y', 'z')), ('x', 'y', 'z'))
+        self.assertEqual(fuse_sublists(('x', 'y', 'z'), ()), ('x', 'y', 'z'))
+
+class TestGenerateFusedCombinations(unittest.TestCase):
+    def test_basic_fusion(self):
+        sublists_A = [('a',)]
+        sublists_B = [('b',)]
+        expected_output = [(('a', 'b'),)]
+        self.assertEqual(generate_fused_combinations(sublists_A, sublists_B), expected_output)
+
+    def test_different_lengths(self):
+        sublists_A = [('a',), ('b',)]
+        sublists_B = [('x',)]
+        expected_output = [(('a', 'x'), ('b',)), (('b', 'x'), ('a',))]
+        self.assertEqual(generate_fused_combinations(sublists_A, sublists_B), expected_output)
+
+    def test_permutation_check(self):
+        sublists_A = [('a',), ('b',)]
+        sublists_B = [('x',), ('y',)]
+        expected_output = [(('a', 'x'), ('b',), ('y',)),
+            (('a', 'y'), ('b',), ('x',)),
+            (('b', 'x'), ('a',), ('y',)),
+            (('b', 'y'), ('a',), ('x',)),
+            (('a', 'x'), ('b', 'y')),
+            (('a', 'y'), ('b', 'x'))]
+        result = generate_fused_combinations(sublists_A, sublists_B)
+        self.assertCountEqual(result, expected_output)  # Order doesn't matter
+
+    def test_empty_sublists(self):
+        sublists_A = []
+        sublists_B = [('x',)]
+        expected_output = []
+        self.assertEqual(generate_fused_combinations(sublists_A, sublists_B), expected_output)
+
+        sublists_A = [('a',)]
+        sublists_B = []
+        expected_output = []
+        self.assertEqual(generate_fused_combinations(sublists_A, sublists_B), expected_output)
+
+    def test_duplicate_elements(self):
+        sublists_A = [('a', 'a'), ('b',)]
+        sublists_B = [('x', 'x'), ('y',)]
+        expected_output = [(('a', 'a', 'x', 'x'), ('b',), ('y',)),
+             (('a', 'a', 'y'), ('b',), ('x', 'x')),
+             (('b', 'x', 'x'), ('a', 'a'), ('y',)),
+             (('b', 'y'), ('a', 'a'), ('x', 'x')),
+             (('a', 'a', 'x', 'x'), ('b', 'y')),
+             (('a', 'a', 'y'), ('b', 'x', 'x'))]
+        result = generate_fused_combinations(sublists_A, sublists_B)
+        self.assertCountEqual(result, expected_output)
+
+class TestListConjointProduct(unittest.TestCase):
+    def test_basic_case(self):
+        A = [(1, ('a',))]
+        B = [(2, ('b',))]
+        expected_output = [(2, ('a', 'b'))]  # Count is multiplied, sublists are fused
+        self.assertEqual(list_conjoint_product(A, B), expected_output)
+
+    def test_different_lengths(self):
+        A = [(1, ('a',)), (3, ('c',))]
+        B = [(2, ('b',))]
+        expected_output = [
+            (2, ('a', 'b')),
+            (6, ('b', 'c'))
+        ]
+        self.assertEqual(list_conjoint_product(A, B), expected_output)
+
+    def test_multiplication_of_counts(self):
+        A = [(2, ('x',)), (3, ('y',))]
+        B = [(4, ('z',))]
+        expected_output = [
+            (8, ('x', 'z')),
+            (12, ('y', 'z'))
+        ]
+        self.assertEqual(list_conjoint_product(A, B), expected_output)
+
+    def test_empty_input(self):
+        A = []
+        B = [(2, ('b',))]
+        self.assertEqual(list_conjoint_product(A, B), [])
+
+        A = [(1, ('a',))]
+        B = []
+        self.assertEqual(list_conjoint_product(A, B), [])
+
+        A = []
+        B = []
+        self.assertEqual(list_conjoint_product(A, B), [])
+
+    def test_onesublist_fusion(self):
+        A = [(1, ('a', 'b'))]
+        B = [(2, ('x', 'y'))]
+        expected_output = [ (2, ('a', 'b', 'x', 'y')) ]
+        result = list_conjoint_product(A, B)
+        self.assertCountEqual(result, expected_output)  
+        
+    def test_complex_fusion(self):
+        A = [(1, ('a', 'b')),(2,('c',),('d',))]
+        B = [(3, ('e', 'f')),(4,('g',),('h',))]
+        expected_output = [(3, ('a', 'b', 'e', 'f')),
+             (4, ('a', 'b', 'g'), ('h',)),
+             (4, ('a', 'b', 'h'), ('g',)),
+             (6, ('c', 'e', 'f'), ('d',)),
+             (6, ('d', 'e', 'f'), ('c',)),
+             (8, ('c', 'g'), ('d',), ('h',)),
+             (8, ('c', 'h'), ('d',), ('g',)),
+             (8, ('d', 'g'), ('c',), ('h',)),
+             (8, ('d', 'h'), ('c',), ('g',)),
+             (8, ('c', 'g'), ('d', 'h')),
+             (8, ('c', 'h'), ('d', 'g'))]
+        result = list_conjoint_product(A, B)
+        self.assertCountEqual(result, expected_output)  
+        
 if __name__ == '__main__':
     unittest.main()

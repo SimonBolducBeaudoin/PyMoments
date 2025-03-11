@@ -7,6 +7,9 @@ from math import factorial
 from more_itertools import distinct_permutations
 from numpy import r_,zeros,full
 
+from itertools import combinations,product,permutations
+from collections import defaultdict
+
 from .DataStructures import growth_string_to_partition
 
 def integer_partitions(n, min_value=1, max_value=None):
@@ -63,7 +66,6 @@ def simplex_iter(s, max_vals):
             for indices in simplex_iter(s - i, max_vals[1:]):
                 yield (i,) + indices
 
-
 def set_partitions(set):
     """
     Generator over all partitions of the given set.
@@ -104,21 +106,73 @@ def mu_partitions(set):
     Yields:
         - Each element of the partitions for centered moments .
     """
-    if not set :
+    if len(set)==0 :
         return 
     for int_partition in integer_partitions(len(set), 2):
         for block_shape in distinct_permutations(int_partition):
            for gs in growth_string_from_blocks_shape(block_shape, set):
                yield growth_string_to_partition(gs,set)
+ 
+def remove_duplicates_and_count(data):
+    count_dict = defaultdict(int)
+    for sublist in data:
+        key = tuple(sorted(sublist))
+        count_dict[key] += 1
+            # Construct the result where count is the first element
+    return [tuple([count] + list(sublist)) for sublist, count in count_dict.items()]
+    
+def list_disjoint_product(A, B):
+    result = []
+    for (count_A, *sublists_A), (count_B, *sublists_B) in product(A, B):
+        new_count = count_A * count_B  # Multiply the leading counts
+        new_sublists = tuple(sublists_A + sublists_B)  # Concatenate the sublists
+        result.append((new_count, *new_sublists))
+    
+    return result
+    
+def fuse_sublists(sublist_A, sublist_B):
+    """Fuses two sublists together into one sorted tuple."""
+    return tuple(sorted(sublist_A + sublist_B))  # Ensures a consistent order
+
+def generate_fused_combinations(sublists_A, sublists_B):
+    """Generates all valid fusions of elements from sublists_A and sublists_B, using indices and permutations for sublists_B."""
+    min_len = min(len(sublists_A), len(sublists_B))
+    fused_results = []
+
+    # Try fusing 1 to min_len elements together using indices
+    for i in range(1, min_len + 1):
+        for idx_comb_A in combinations(range(len(sublists_A)), i):
+            for idx_perm_B in permutations(range(len(sublists_B)), i):
+                # Fuse the elements corresponding to the indices
+                fused = [fuse_sublists(sublists_A[i_a], sublists_B[i_b]) for i_a, i_b in zip(idx_comb_A, idx_perm_B)]
+                
+                # Keep remaining untouched elements
+                remaining_A = [sublists_A[idx] for idx in range(len(sublists_A)) if idx not in idx_comb_A]
+                remaining_B = [sublists_B[idx] for idx in range(len(sublists_B)) if idx not in idx_perm_B]
+                
+                # Construct new sublist arrangement
+                new_sublists = tuple(fused + remaining_A + remaining_B)
+                fused_results.append(new_sublists)
+    
+    return fused_results
+    
+def list_conjoint_product(A, B):
+    result = []
+    for (count_A, *sublists_A), (count_B, *sublists_B) in product(A, B):
+        new_count = count_A * count_B  # Multiply the leading counts
+        # Generate all fused combinations
+        fused_combinations = generate_fused_combinations(sublists_A, sublists_B)
+        # Store each valid combination in the result list
+        for new_sublists in fused_combinations:
+            result.append((new_count, *new_sublists))
+    return result
             
-def retricted_combinations(iterable, r):
+def restricted_combinations(iterable, r):
     """
-    Very similar to itertools.combinations.
-    Produces the combinations placing the next digit in a restricted growth string
-    Always returns the first element first and then combines the rest
+    Similar to itertools.combinations, but always returns the first element 
+    first and then combines the rest.
     retricted_combinations('ABCD', 2)   → AB AC AD
     retricted_combinations(range(4), 3) → 012 013 023
-    Use in a restricted growth string
     
     Say the growths string's state is currently
         0010x10xx 
@@ -136,24 +190,11 @@ def retricted_combinations(iterable, r):
         return
     
     first = iterable[0]
-    
-    r-=1
+    r -= 1
     pool = tuple(iterable[1:])
-    n = len(pool)
     
-    indices = list(range(r))
-
-    yield (first,) + tuple(pool[i] for i in indices)
-    while True:
-        for i in reversed(range(r)):
-            if indices[i] != i + n - r:
-                break
-        else:
-            return
-        indices[i] += 1
-        for j in range(i+1, r):
-            indices[j] = indices[j-1] + 1
-        yield (first,) +tuple(pool[i] for i in indices)
+    for combo in combinations(pool, r):
+        yield (first,) + combo
 
 class growth_string_from_blocks_shape:
     """
@@ -179,7 +220,7 @@ class growth_string_from_blocks_shape:
     def _init_from_(self,start=0) :
         for val,size in zip(self.GS_vals[start:-1],self.blocks_shape[start:-1]) :
             w    = self.available  
-            comb = retricted_combinations( self.max_vals[w], size)
+            comb = restricted_combinations( self.max_vals[w], size)
             nxt  = next(comb)
             self.GS_idx += (nxt,) 
             self.GS[ [*nxt] ] = val
@@ -194,7 +235,7 @@ class growth_string_from_blocks_shape:
         
     def __next__(self):
         if self._first_call_ :
-            if not self.set :
+            if len(self.set)==0 :
                 return []
             self._init_from_(0)
             self._first_call_ = False
