@@ -62,7 +62,7 @@ def sum_multiplicities(partitions):
     return sum(count for count, *partition in partitions if count > 1)
 
 def benchmark_multiplicities():
-    sizes = list(range(2, 13, 2))  # Set sizes: 2, 4, 6, 8, 10, 12
+    sizes = list(range(2, 17, 2))  # Set sizes: 2, 4, 6, 8, 10, 12
     set_templates = [['X'] * (n // 2) + ['Y'] * (n // 2) for n in sizes]
 
     multiplicities_sums = []
