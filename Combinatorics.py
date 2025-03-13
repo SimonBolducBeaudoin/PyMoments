@@ -7,7 +7,7 @@ from math import factorial
 from more_itertools import distinct_permutations
 from numpy import r_,zeros,full
 
-from itertools import combinations,product,permutations
+from itertools import combinations,product,permutations,groupby
 from collections import defaultdict
 
 from .DataStructures import growth_string_to_partition
@@ -112,7 +112,7 @@ def mu_partitions(set):
         for block_shape in distinct_permutations(int_partition):
            for gs in growth_string_from_blocks_shape(block_shape, set):
                yield growth_string_to_partition(gs,set)
- 
+    
 def remove_duplicates_and_count(data):
     count_dict = defaultdict(int)
     for sublist in data:
@@ -121,18 +121,13 @@ def remove_duplicates_and_count(data):
             # Construct the result where count is the first element
     return [tuple([count] + list(sublist)) for sublist, count in count_dict.items()]
     
-def list_disjoint_product(A, B):
+def disjoint_product(A, B):
     result = []
     for (count_A, *sublists_A), (count_B, *sublists_B) in product(A, B):
         new_count = count_A * count_B  # Multiply the leading counts
         new_sublists = tuple(sublists_A + sublists_B)  # Concatenate the sublists
         result.append((new_count, *new_sublists))
-    
     return result
-    
-def fuse_sublists(sublist_A, sublist_B):
-    """Fuses two sublists together into one sorted tuple."""
-    return tuple(sorted(sublist_A + sublist_B))  # Ensures a consistent order
 
 def generate_fused_combinations(sublists_A, sublists_B):
     """Generates all valid fusions of elements from sublists_A and sublists_B, using indices and permutations for sublists_B."""
@@ -144,8 +139,8 @@ def generate_fused_combinations(sublists_A, sublists_B):
         for idx_comb_A in combinations(range(len(sublists_A)), i):
             for idx_perm_B in permutations(range(len(sublists_B)), i):
                 # Fuse the elements corresponding to the indices
-                fused = [fuse_sublists(sublists_A[i_a], sublists_B[i_b]) for i_a, i_b in zip(idx_comb_A, idx_perm_B)]
-                
+                fused = [tuple(sorted(sublists_A[i_a] + sublists_B[i_b])) for i_a, i_b in zip(idx_comb_A, idx_perm_B)]
+                          
                 # Keep remaining untouched elements
                 remaining_A = [sublists_A[idx] for idx in range(len(sublists_A)) if idx not in idx_comb_A]
                 remaining_B = [sublists_B[idx] for idx in range(len(sublists_B)) if idx not in idx_perm_B]
@@ -153,10 +148,9 @@ def generate_fused_combinations(sublists_A, sublists_B):
                 # Construct new sublist arrangement
                 new_sublists = tuple(fused + remaining_A + remaining_B)
                 fused_results.append(new_sublists)
-    
     return fused_results
     
-def list_conjoint_product(A, B):
+def conjoint_product(A, B):
     result = []
     for (count_A, *sublists_A), (count_B, *sublists_B) in product(A, B):
         new_count = count_A * count_B  # Multiply the leading counts
@@ -166,6 +160,28 @@ def list_conjoint_product(A, B):
         for new_sublists in fused_combinations:
             result.append((new_count, *new_sublists))
     return result
+    
+def partitions_composition(A, B):
+    """Computes the union of the outputs of disjoint_product(A, B) and conjoint_product(A, B)."""
+    return disjoint_product(A, B) + conjoint_product(A, B)
+    
+def set_partitions_symmetries(set):
+    if len(set) == 0:
+        return []
+    
+    set = sorted(set)  # Ensure order
+    
+    # Group identical elements together
+    groups = [list(group) for _, group in groupby(set)]
+    
+    # Initialize result with partitions of the first group
+    current_multiset = remove_duplicates_and_count(set_partitions(groups[0]))
+
+    for i in range(1, len(groups)):
+        next_multiset = remove_duplicates_and_count(set_partitions(groups[i]))
+        current_multiset = partitions_composition(current_multiset, next_multiset)
+
+    return current_multiset
             
 def restricted_combinations(iterable, r):
     """

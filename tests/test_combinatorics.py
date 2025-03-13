@@ -8,12 +8,12 @@ try : # Absolute import
     # python -m unittest discover -s PyMoments/tests -p "test_*.py
     # From PyMoments's parent directorie
     from PyMoments.Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff,binom
-    from PyMoments.Combinatorics import fuse_sublists,list_disjoint_product,generate_fused_combinations,list_conjoint_product
+    from PyMoments.Combinatorics import disjoint_product,generate_fused_combinations,conjoint_product,set_partitions_symmetries
 except ModuleNotFoundError : # Relative import
     # Works with 
     # pytest PyMoments/tests
     from ..Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff,binom
-    from ..Combinatorics import fuse_sublists,list_disjoint_product,generate_fused_combinations,list_conjoint_product
+    from ..Combinatorics import disjoint_product,generate_fused_combinations,conjoint_product,set_partitions_symmetries
 
 class TestCombinatorics(unittest.TestCase):
 
@@ -247,17 +247,6 @@ class TestMuPartitions(unittest.TestCase):
         [['A', 'D'], ['B', 'C']]]
         self.assertEqual(partitions, expected)
 
-class TestFuseSublists(unittest.TestCase):
-    def test_basic_fusion(self):
-        self.assertEqual(fuse_sublists(('a', 'b'), ('c', 'd')), ('a', 'b', 'c', 'd'))
-
-    def test_fusion_with_duplicates(self):
-        self.assertEqual(fuse_sublists(('a', 'b', 'a'), ('b', 'a', 'c')), ('a', 'a', 'a', 'b', 'b', 'c'))
-
-    def test_fusion_with_empty_sublist(self):
-        self.assertEqual(fuse_sublists((), ('x', 'y', 'z')), ('x', 'y', 'z'))
-        self.assertEqual(fuse_sublists(('x', 'y', 'z'), ()), ('x', 'y', 'z'))
-
 class TestGenerateFusedCombinations(unittest.TestCase):
     def test_basic_fusion(self):
         sublists_A = [('a',)]
@@ -311,7 +300,7 @@ class TestListConjointProduct(unittest.TestCase):
         A = [(1, ('a',))]
         B = [(2, ('b',))]
         expected_output = [(2, ('a', 'b'))]  # Count is multiplied, sublists are fused
-        self.assertEqual(list_conjoint_product(A, B), expected_output)
+        self.assertEqual(conjoint_product(A, B), expected_output)
 
     def test_different_lengths(self):
         A = [(1, ('a',)), (3, ('c',))]
@@ -320,7 +309,7 @@ class TestListConjointProduct(unittest.TestCase):
             (2, ('a', 'b')),
             (6, ('b', 'c'))
         ]
-        self.assertEqual(list_conjoint_product(A, B), expected_output)
+        self.assertEqual(conjoint_product(A, B), expected_output)
 
     def test_multiplication_of_counts(self):
         A = [(2, ('x',)), (3, ('y',))]
@@ -329,26 +318,26 @@ class TestListConjointProduct(unittest.TestCase):
             (8, ('x', 'z')),
             (12, ('y', 'z'))
         ]
-        self.assertEqual(list_conjoint_product(A, B), expected_output)
+        self.assertEqual(conjoint_product(A, B), expected_output)
 
     def test_empty_input(self):
         A = []
         B = [(2, ('b',))]
-        self.assertEqual(list_conjoint_product(A, B), [])
+        self.assertEqual(conjoint_product(A, B), [])
 
         A = [(1, ('a',))]
         B = []
-        self.assertEqual(list_conjoint_product(A, B), [])
+        self.assertEqual(conjoint_product(A, B), [])
 
         A = []
         B = []
-        self.assertEqual(list_conjoint_product(A, B), [])
+        self.assertEqual(conjoint_product(A, B), [])
 
     def test_onesublist_fusion(self):
         A = [(1, ('a', 'b'))]
         B = [(2, ('x', 'y'))]
         expected_output = [ (2, ('a', 'b', 'x', 'y')) ]
-        result = list_conjoint_product(A, B)
+        result = conjoint_product(A, B)
         self.assertCountEqual(result, expected_output)  
         
     def test_complex_fusion(self):
@@ -365,8 +354,47 @@ class TestListConjointProduct(unittest.TestCase):
              (8, ('d', 'h'), ('c',), ('g',)),
              (8, ('c', 'g'), ('d', 'h')),
              (8, ('c', 'h'), ('d', 'g'))]
-        result = list_conjoint_product(A, B)
+        result = conjoint_product(A, B)
         self.assertCountEqual(result, expected_output)  
+
+class TestSetPartitionsSymmetries(unittest.TestCase):
+    def sum_counts(self, partitions):
+        """Helper function to sum the first element (count) of each partition tuple."""
+        return sum(count for count, *partition in partitions)
+
+    def extract_partitions(self, partitions):
+        """Helper function to extract just the partition structures, ignoring counts."""
+        return {tuple(sorted(partition, key=lambda x: (len(x), x))) for _, *partition in partitions}
+
+    def check_partition_consistency(self, set_input):
+        """Helper function to check partition consistency for different test cases."""
+        # Generate partitions using both methods
+        partitions_symmetries_result = set_partitions_symmetries(set_input)
+        partitions_result = list(set_partitions(tuple(set_input)))
+
+        # Check sum of repetitions
+        self.assertEqual(self.sum_counts(partitions_symmetries_result), len(partitions_result))
+
+        # Check that all partitions in set_partitions appear in set_partitions_symmetries
+        symmetries_partitions = self.extract_partitions(partitions_symmetries_result)
+        raw_partitions = self.extract_partitions([(1, *partition) for partition in partitions_result])  # Fake count for comparison
+
+        self.assertTrue(raw_partitions.issubset(symmetries_partitions))
+
+    def test_partition_consistency_case_1(self):
+        self.check_partition_consistency([1, 1, 2, 2, 2])
+
+    def test_partition_consistency_case_2(self):
+        self.check_partition_consistency([1, 2, 3])
+
+    def test_partition_consistency_case_3(self):
+        self.check_partition_consistency([1, 1, 1, 2])
+
+    def test_partition_consistency_case_4(self):
+        self.check_partition_consistency([1, 1, 1, 1])
+
+    def test_partition_consistency_case_5(self):
+        self.check_partition_consistency([1, 2, 2, 3, 3, 3])
         
 if __name__ == '__main__':
     unittest.main()
