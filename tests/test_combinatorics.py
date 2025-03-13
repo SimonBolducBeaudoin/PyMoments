@@ -396,5 +396,8 @@ class TestSetPartitionsSymmetries(unittest.TestCase):
     def test_partition_consistency_case_5(self):
         self.check_partition_consistency([1, 2, 2, 3, 3, 3])
         
+    def test_partition_consistency_case_6(self):
+        self.check_partition_consistency([1,1,1,1, 2, 2,2, 3, 3, 3])
+        
 if __name__ == '__main__':
     unittest.main()
