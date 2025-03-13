@@ -137,14 +137,12 @@ def generate_fused_combinations(partition_A, partition_B):
     # Try fusing 1 to min_len elements together using indices
     for i in range(1, min_len + 1):
         for idx_comb_A in combinations(range(len(partition_A)), i):
+            remaining_A = [partition_A[idx] for idx in range(len(partition_A)) if idx not in idx_comb_A]    
             for idx_perm_B in permutations(range(len(partition_B)), i):
                 # Fuse the elements corresponding to the indices
-                fused = [tuple(sorted(partition_A[i_a] + partition_B[i_b])) for i_a, i_b in zip(idx_comb_A, idx_perm_B)]
-                          
+                fused = [tuple(sorted(partition_A[i_a] + partition_B[i_b])) for i_a, i_b in zip(idx_comb_A, idx_perm_B)]    
                 # Keep remaining untouched elements
-                remaining_A = [partition_A[idx] for idx in range(len(partition_A)) if idx not in idx_comb_A]
                 remaining_B = [partition_B[idx] for idx in range(len(partition_B)) if idx not in idx_perm_B]
-                
                 # Construct new sublist arrangement
                 new_sublists = tuple(fused + remaining_A + remaining_B)
                 fused_results.append(new_sublists)
