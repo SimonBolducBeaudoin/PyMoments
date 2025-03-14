@@ -304,29 +304,3 @@ def ff(n, i):
         return n
     else:
         return n * ff(n-1, i-1)
-
-
-def binom(n, k):
-    """
-    Computes the binomial coefficient n choose k.
-    I.e., computs the number of ways to choose k-element subsets from a collection with n elements.
-
-    Parameters
-    ----------
-    n : int
-        Number of elements in the collection.
-    k : int
-        Size of subsets of the collection to choose.
-
-    Returns
-    -------
-    b : int
-        Binomial coefficient n choose k.
-
-    Notes
-    -----
-    The binomial coefficient is given by n! / k! (n-k)!
-    Thus, the computation is simplified using falling factorials:
-        (n, k) = n! / k! (n-k)! = (n)_k / (k)_(k-1)
-    """
-    return ff(n, k) // ff(k, k-1)

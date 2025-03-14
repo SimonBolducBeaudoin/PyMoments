@@ -7,6 +7,8 @@ import numpy as np
 from .Combinatorics import *
 from .DataStructures import *
 
+from math import comb
+
 def kstat(data, modes, sample_axis=0, variable_axis=1, coef_tree=None):
     """
     Compute a multivariate k-statistic.
@@ -94,9 +96,9 @@ def kstat_coef(n, block_sizes):
             for k in range(len(block_sizes)):
                 stir2_times_fac = b[k] ** block_sizes[k]
                 for i_even in range(1, b[k], 2):
-                    stir2_times_fac -= binom(b[k], i_even) * ((b[k] - i_even) ** block_sizes[k])
+                    stir2_times_fac -= comb(b[k], i_even) * ((b[k] - i_even) ** block_sizes[k])
                 for i_odd in range(2, b[k], 2):
-                    stir2_times_fac += binom(b[k], i_odd) * ((b[k] - i_odd) ** block_sizes[k])
+                    stir2_times_fac += comb(b[k], i_odd) * ((b[k] - i_odd) ** block_sizes[k])
 
                 product_over_blocks *= stir2_times_fac / b[k]
 
