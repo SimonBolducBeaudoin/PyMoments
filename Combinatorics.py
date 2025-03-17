@@ -11,8 +11,6 @@ from itertools import combinations,product,permutations,groupby
 from collections import defaultdict
 from math import perm,comb,prod
 
-from .DataStructures import growth_string_to_partition
-
 def integer_partitions(n, min_value=1, max_value=None):
     """
     Generate all partitions of n where each part is at least min_value.

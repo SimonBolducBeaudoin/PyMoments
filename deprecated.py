@@ -1,3 +1,11 @@
+def growth_string_to_partition(growth_string,set):
+    ret = []
+    for i in range(max(growth_string)+1):
+        ret += [[]]
+    for idx,elem in zip(growth_string,set) :
+        ret[idx] += [elem]
+    return ret
+
 def restricted_combinations(iterable, r):
     """
     Similar to itertools.combinations, but always returns the first element 
