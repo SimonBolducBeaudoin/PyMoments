@@ -1,5 +1,6 @@
 import time
 import matplotlib.pyplot as plt
+from SBB.PyMoments.Combinatorics import set_partitions, set_partitions_symmetries
 
 def benchmark_set_partitions():
     sizes = list(range(2, 15, 2))  # Set sizes: 2, 4, 6, 8, 10, 12
