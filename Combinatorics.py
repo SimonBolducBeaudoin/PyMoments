@@ -67,7 +67,7 @@ def simplex_iter(s, max_vals):
             for indices in simplex_iter(s - i, max_vals[1:]):
                 yield (i,) + indices
 
-def set_partitions(set):
+def _set_partitions_slow(set):
     """
     Generator over all partitions of the given set.
 
@@ -87,32 +87,35 @@ def set_partitions(set):
         yield [(set[0],)]
     else:
         head = set[0]
-        for tail_parts in set_partitions(set[1:]):
+        for tail_parts in _set_partitions_slow(set[1:]):
             for i, part in enumerate(tail_parts):
                 new_part = (head,) + part
                 yield tail_parts[:i] + [new_part] + tail_parts[i + 1:]
             yield [(head,)] + tail_parts
             
-def mu_partitions(set):
-    """
-    Returns partitions for centered moments 
-    A.k.a. removes all set partition with a block of size 1.
-    
-    It works by :
-    1. Generating an iterator if the integer partitions.
-    2. Getting distinct permutations of each integer partition.
-    3. Producing growth strings based on the permutations.
-    4. Converting the growth strings to the corresponding elements of the set.
+class _mu_partitions_slow:
+    def __init__(self, set):
+        self.gen = _set_partitions_slow(set)
 
-    Yields:
-        - Each element of the partitions for centered moments .
-    """
-    if len(set)==0 :
-        return 
-    for int_partition in integer_partitions(len(set), 2):
-        for block_shape in distinct_permutations(int_partition):
-           for gs in growth_string_from_blocks_shape(block_shape, set):
-               yield growth_string_to_partition(gs,set)
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # looking for either the generator to end or 
+        # the next list of tuple with no
+        while True :
+            this_tpl_good = True
+            nxt = next(self.gen)
+            if nxt is None:
+                raise StopIteration
+            # checks if one of the elements has lenght 1.
+            for idx_tpl in nxt :
+                if len(idx_tpl)==1 :
+                    this_tpl_good = False
+                    break
+            if this_tpl_good : 
+                break 
+        return nxt
         
 def disjoint_product(A, B):
     result = []
@@ -259,7 +262,7 @@ def partitions_composition(A, B):
     """
     return disjoint_product(A, B) + conjoint_product(A, B)
     
-def set_partitions_symmetries(set):
+def set_partitions(set):
     if len(set) == 0:
         return []
     
@@ -269,108 +272,36 @@ def set_partitions_symmetries(set):
     groups = [list(group) for _, group in groupby(set)]
     
     # Initialize result with partitions of the first group
-    current_multiset = remove_duplicates_and_count(set_partitions(groups[0]))
+    current_multiset = remove_duplicates_and_count(_set_partitions_slow(groups[0]))
 
     for i in range(1, len(groups)):
-        next_multiset = remove_duplicates_and_count(set_partitions(groups[i]))
+        next_multiset = remove_duplicates_and_count(_set_partitions_slow(groups[i]))
         current_multiset = partitions_composition(current_multiset, next_multiset)
 
     return current_multiset
+    
+def mu_partitions(set):
+    def filter_tuples(data: list) -> list:
+        """Removes tuples containing at least one block of length 1."""
+        return [tup for tup in data if all(len(block) != 1 for block in tup[1:])]
+    
+    if len(set) == 0:
+        return []
+    
+    set = sorted(set)  # Ensure order
+    
+    # Group identical elements together
+    groups = [list(group) for _, group in groupby(set)]
+    
+    # Initialize result with partitions of the first group
+    current_multiset = remove_duplicates_and_count(_set_partitions_slow(groups[0]))
+
+    for i in range(1, len(groups)):
+        next_multiset = remove_duplicates_and_count(_set_partitions_slow(groups[i]))
+        current_multiset = partitions_composition(current_multiset, next_multiset)
+        
+    return filter_tuples(current_multiset)
             
-def restricted_combinations(iterable, r):
-    """
-    Similar to itertools.combinations, but always returns the first element 
-    first and then combines the rest.
-    retricted_combinations('ABCD', 2)   → AB AC AD
-    retricted_combinations(range(4), 3) → 012 013 023
-    
-    Say the growths string's state is currently
-        0010x10xx 
-        and say that next digits to be place are two 2s.
-        There are 3 spots available to be placed in.
-        The first x must always be occupied by a 2 for the restricted growth string 
-        to respect its growth inequality. Therefore the options are
-        00102102x
-        0010210x2
-        This generator is given the indices for the possible position of the two 2s 
-        will return the right combinations of possible placements.
-        retricted_combinations([5,8,9],2) -> (5,8) and (5,9).
-    """
-    if r > len(iterable):
-        return
-    
-    first = iterable[0]
-    r -= 1
-    pool = tuple(iterable[1:])
-    
-    for combo in combinations(pool, r):
-        yield (first,) + combo
-
-class growth_string_from_blocks_shape:
-    """
-    Generates all valid growth string corresponding to a certain blocks shape (aka a tuple of blocks sizes).
-    """
-    def __init__(self, blocks_shape, set):
-        self.GS_vals = r_[:len(blocks_shape)]       # Ex: (0,1,2) 
-        self.blocks_shape = blocks_shape            # Ex: (2,1,1)
-        self.set = set                              # Ex: (A,B,C,D)
-        self.max_vals = r_[:len(set)]               # Ex: (0,1,2,3)
-        self.max_val = len(set)-1
-        
-        self.GS    = zeros( (len(set),), int )      # Ex: (0,0,0,0)
-        
-        self.available = full(  (len(set),), True ) # Ex: (T,T,T,T)
-        
-        # Initializing a list for each number to be placed in the growth string
-        self.it = []
-        self.GS_idx = []
-        
-        self._first_call_= True
-        
-    def _init_from_(self,start=0) :
-        for val,size in zip(self.GS_vals[start:-1],self.blocks_shape[start:-1]) :
-            w    = self.available  
-            comb = restricted_combinations( self.max_vals[w], size)
-            nxt  = next(comb)
-            self.GS_idx += (nxt,) 
-            self.GS[ [*nxt] ] = val
-            self.available[ [*nxt] ] = False
-            self.it += [comb]
-        
-        # The last indices can always be deduced.
-        self.GS[self.available] = self.GS_vals[-1]
-
-    def __iter__(self):
-        return self
-        
-    def __next__(self):
-        if self._first_call_ :
-            if len(self.set)==0 :
-                return []
-            self._init_from_(0)
-            self._first_call_ = False
-            return self.GS
-        else :
-            for i,(it,idx) in enumerate(zip(self.it[::-1],self.GS_idx[::-1])) :
-                i += 1
-                self.available[[*idx]] = True
-                del self.GS_idx[-1]
-                try :                 
-                    nxt = next(it)
-                    self.GS_idx += (nxt,) 
-                    val = self.GS_vals[-i-1]
-                    self.GS[ [*nxt] ] = val
-                    self.available[ [*nxt] ] = False
-                    
-                    start = len(self.GS_vals)-i
-                    self._init_from_(start)
-                    
-                    return self.GS
-                except StopIteration : 
-                    del self.it[-1] 
-                    continue
-            raise StopIteration
-
 def ff(n, i):
     """
     Returns the falling factorial (n)_i.

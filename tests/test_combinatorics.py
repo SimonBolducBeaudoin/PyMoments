@@ -7,13 +7,13 @@ try : # Absolute import
     # Works with calling 
     # python -m unittest discover -s PyMoments/tests -p "test_*.py
     # From PyMoments's parent directorie
-    from PyMoments.Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff
-    from PyMoments.Combinatorics import disjoint_product,generate_fused_combinations,conjoint_product,set_partitions_symmetries
+    from PyMoments.Combinatorics import simplex_iter,_set_partitions_slow,integer_partitions,mu_partitions,ff
+    from PyMoments.Combinatorics import disjoint_product,generate_fused_combinations,conjoint_product,set_partitions
 except ModuleNotFoundError : # Relative import
     # Works with 
     # pytest PyMoments/tests
-    from ..Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff
-    from ..Combinatorics import disjoint_product,generate_fused_combinations,conjoint_product,set_partitions_symmetries
+    from ..Combinatorics import simplex_iter,_set_partitions_slow,integer_partitions,mu_partitions,ff
+    from ..Combinatorics import disjoint_product,generate_fused_combinations,conjoint_product,set_partitions
 
 class TestCombinatorics(unittest.TestCase):
 
@@ -42,14 +42,14 @@ class TestCombinatorics(unittest.TestCase):
     def test_set_partitions(self):
 
         # Test partitions of an empty set
-        s0_parts_est = list(set_partitions([]))
+        s0_parts_est = list(_set_partitions_slow([]))
         self.assertEqual(len(s0_parts_est), 0)
 
         # Test partitions of a 1-element set
         s1 = ['dirigible']
         s1_parts_true = {
             frozenset([('dirigible',)])}
-        s1_parts_est = set(map(frozenset, set_partitions(s1)))
+        s1_parts_est = set(map(frozenset, _set_partitions_slow(s1)))
         self.assertSetEqual(s1_parts_est, s1_parts_true)
 
         # Test partitions of a 2-element set
@@ -57,7 +57,7 @@ class TestCombinatorics(unittest.TestCase):
         s2_parts_true = {
             frozenset([(1,), (-1,)]),
             frozenset([(1, -1)])}
-        s2_parts_est = set(map(frozenset, set_partitions(s2)))
+        s2_parts_est = set(map(frozenset, _set_partitions_slow(s2)))
         self.assertSetEqual(s2_parts_est, s2_parts_true)
 
         # Test partitions of a 3-element set
@@ -68,7 +68,7 @@ class TestCombinatorics(unittest.TestCase):
             frozenset([('apple', 1.4), ('banana',)]),
             frozenset([('apple',), ('banana', 1.4)]),
             frozenset([('apple', 'banana', 1.4)])}
-        s3_parts_est = set(map(frozenset, set_partitions(s3)))
+        s3_parts_est = set(map(frozenset, _set_partitions_slow(s3)))
         self.assertSetEqual(s3_parts_est, s3_parts_true)
 
         # Test partitions of a 4-element set
@@ -89,14 +89,14 @@ class TestCombinatorics(unittest.TestCase):
             frozenset([(1, 3, 4), (2,)]),
             frozenset([(2, 3, 4), (1,)]),
             frozenset([(1, 2, 3, 4)])}
-        s4_parts_est = set(map(frozenset, set_partitions(s4)))
+        s4_parts_est = set(map(frozenset, _set_partitions_slow(s4)))
         self.assertSetEqual(s4_parts_est, s4_parts_true)
 
         # Validate sizes of larger sets
         bell_numbers = [52, 203, 877, 4140, 21147, 115975]
         for n in range(5, 11):
             count = 0
-            for _ in set_partitions(list(range(n))):
+            for _ in _set_partitions_slow(list(range(n))):
                 count += 1
             self.assertEqual(count, bell_numbers[n-5])
 
@@ -191,34 +191,34 @@ class TestIntegerPartitions(unittest.TestCase):
 class TestMuPartitions(unittest.TestCase):
     def test_empty_set(self):
         """mu_partitions should return nothing for an empty set."""
-        partitions = list(mu_partitions([]))
+        partitions = mu_partitions([])
         self.assertEqual(partitions, [])
 
     def test_single_element(self):
         """mu_partitions should return nothing for a single-element set."""
-        partitions = list(mu_partitions(["A"]))
+        partitions = mu_partitions(("A"))
         self.assertEqual(partitions, [])
 
     def test_two_elements(self):
         """mu_partitions should return a single partition: both elements together."""
-        partitions = list(mu_partitions(["A", "B"]))
-        expected = [[["A", "B"]]]  # Example expected output (assuming binary representation)
+        partitions = mu_partitions(("A", "B"))
+        expected = [(1, ('A', 'B'))]  # Example expected output (assuming binary representation)
         self.assertEqual(partitions, expected)
 
     def test_three_elements(self):
         """mu_partitions should remove partitions that contain singletons."""
-        partitions = list(mu_partitions(["A", "B", "C"]))
-        expected=[[['A', 'B', 'C']]]
+        partitions = mu_partitions(("A", "B", "C"))
+        expected=[(1, ('A', 'B', 'C'))]
         self.assertEqual(partitions, expected)
 
     def test_four_elements(self):
         """mu_partitions should generate correct partitions for four elements."""
-        partitions = list(mu_partitions(["A", "B", "C", "D"]))
+        partitions = mu_partitions(("A", "B", "C", "D"))
         # Check that none of the partitions contain singleton blocks
-        expected = [[['A', 'B', 'C', 'D']],
-        [['A', 'B'], ['C', 'D']],
-        [['A', 'C'], ['B', 'D']],
-        [['A', 'D'], ['B', 'C']]]
+        expected = [(1, ('C', 'D'), ('A', 'B')),
+             (1, ('B', 'D'), ('A', 'C')),
+             (1, ('A', 'D'), ('B', 'C')),
+             (1, ('A', 'B', 'C', 'D'))]
         self.assertEqual(partitions, expected)
 
 class TestGenerateFusedCombinations(unittest.TestCase):
@@ -357,13 +357,13 @@ class TestSetPartitionsSymmetries(unittest.TestCase):
     def check_partition_consistency(self, set_input):
         """Helper function to check partition consistency for different test cases."""
         # Generate partitions using both methods
-        partitions_symmetries_result = set_partitions_symmetries(set_input)
-        partitions_result = list(set_partitions(tuple(set_input)))
+        partitions_symmetries_result = set_partitions(set_input)
+        partitions_result = list(_set_partitions_slow(tuple(set_input)))
 
         # Check sum of repetitions
         self.assertEqual(self.sum_counts(partitions_symmetries_result), len(partitions_result))
 
-        # Check that all partitions in set_partitions appear in set_partitions_symmetries
+        # Check that all partitions in _set_partitions_slow appear in set_partitions
         symmetries_partitions = self.extract_partitions(partitions_symmetries_result)
         raw_partitions = self.extract_partitions([(1, *partition) for partition in partitions_result])  # Fake count for comparison
 

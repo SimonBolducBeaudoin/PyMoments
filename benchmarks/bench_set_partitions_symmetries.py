@@ -1,6 +1,6 @@
 import time
 import matplotlib.pyplot as plt
-from SBB.PyMoments.Combinatorics import set_partitions, set_partitions_symmetries
+from SBB.PyMoments.Combinatorics import _set_partitions_slow, set_partitions
 
 def benchmark_set_partitions():
     sizes = list(range(2, 15, 2))  # Set sizes: 2, 4, 6, 8, 10, 12
@@ -13,16 +13,16 @@ def benchmark_set_partitions():
     for test_set in set_templates:
         tuple_input = tuple(test_set)
 
-        # Time set_partitions
+        # Time _set_partitions_slow
         start_time = time.time()
-        list(set_partitions(tuple_input))
+        list(_set_partitions_slow(tuple_input))
         end_time = time.time()
         time_partitions = end_time - start_time
         times_set_partitions.append(time_partitions)
 
-        # Time set_partitions_symmetries
+        # Time set_partitions
         start_time = time.time()
-        set_partitions_symmetries(test_set)
+        set_partitions(test_set)
         end_time = time.time()
         time_symmetries = end_time - start_time
         times_set_partitions_symmetries.append(time_symmetries)
@@ -31,26 +31,26 @@ def benchmark_set_partitions():
         speedup = time_partitions / time_symmetries if time_symmetries > 0 else float('inf')
         speedup_ratios.append(speedup)
 
-        print(f"Set size {len(test_set)} | set_partitions: {time_partitions:.4f}s | "
-              f"set_partitions_symmetries: {time_symmetries:.4f}s | Speedup: {speedup:.2f}x")
+        print(f"Set size {len(test_set)} | _set_partitions_slow: {time_partitions:.4f}s | "
+              f"set_partitions: {time_symmetries:.4f}s | Speedup: {speedup:.2f}x")
 
     # Plot execution times
     plt.figure(figsize=(10, 5))
     plt.subplot(1, 2, 1)
-    plt.plot(sizes, times_set_partitions, label="set_partitions", marker='o')
-    plt.plot(sizes, times_set_partitions_symmetries, label="set_partitions_symmetries", marker='s')
+    plt.plot(sizes, times_set_partitions, label="_set_partitions_slow", marker='o')
+    plt.plot(sizes, times_set_partitions_symmetries, label="set_partitions", marker='s')
     plt.xlabel("Set Size")
     plt.ylabel("Execution Time (seconds)")
-    plt.title("Execution Time: set_partitions vs. set_partitions_symmetries")
+    plt.title("Execution Time: _set_partitions_slow vs. set_partitions")
     plt.legend()
     plt.grid(True)
 
     # Plot speedup
     plt.subplot(1, 2, 2)
-    plt.plot(sizes, speedup_ratios, label="Speedup (set_partitions / set_partitions_symmetries)", marker='^', color='red')
+    plt.plot(sizes, speedup_ratios, label="Speedup (_set_partitions_slow / set_partitions)", marker='^', color='red')
     plt.xlabel("Set Size")
     plt.ylabel("Speedup Factor")
-    plt.title("Speedup of set_partitions_symmetries")
+    plt.title("Speedup of set_partitions")
     plt.axhline(y=1, color='gray', linestyle='--', linewidth=0.8)  # Baseline at y=1 (no speedup)
     plt.legend()
     plt.grid(True)
@@ -71,7 +71,7 @@ def benchmark_multiplicities():
 
     for test_set in set_templates:
         start_time = time.time()
-        partitions_symmetries_result = set_partitions_symmetries(test_set)
+        partitions_symmetries_result = set_partitions(test_set)
         end_time = time.time()
 
         execution_time = end_time - start_time
@@ -88,7 +88,7 @@ def benchmark_multiplicities():
     plt.plot(sizes, multiplicities_sums, label="Sum of Multiplicities (>1)", marker='o', color='blue')
     plt.xlabel("Set Size")
     plt.ylabel("Sum of Multiplicities")
-    plt.title("Sum of Multiplicities in set_partitions_symmetries")
+    plt.title("Sum of Multiplicities in set_partitions")
     plt.legend()
     plt.grid(True)
 
@@ -97,7 +97,7 @@ def benchmark_multiplicities():
     plt.plot(sizes, execution_times, label="Execution Time", marker='s', color='red')
     plt.xlabel("Set Size")
     plt.ylabel("Execution Time (seconds)")
-    plt.title("Execution Time of set_partitions_symmetries")
+    plt.title("Execution Time of set_partitions")
     plt.legend()
     plt.grid(True)
 
