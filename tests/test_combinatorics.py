@@ -7,12 +7,12 @@ try : # Absolute import
     # Works with calling 
     # python -m unittest discover -s PyMoments/tests -p "test_*.py
     # From PyMoments's parent directorie
-    from PyMoments.Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff,binom
+    from PyMoments.Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff
     from PyMoments.Combinatorics import disjoint_product,generate_fused_combinations,conjoint_product,set_partitions_symmetries
 except ModuleNotFoundError : # Relative import
     # Works with 
     # pytest PyMoments/tests
-    from ..Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff,binom
+    from ..Combinatorics import simplex_iter,set_partitions,integer_partitions,mu_partitions,ff
     from ..Combinatorics import disjoint_product,generate_fused_combinations,conjoint_product,set_partitions_symmetries
 
 class TestCombinatorics(unittest.TestCase):
@@ -110,32 +110,6 @@ class TestCombinatorics(unittest.TestCase):
             for i in range(1, n + 1):
                 self.assertEqual(ff(n, i), ff_true)
                 ff_true *= (n - i)
-
-    def test_binom(self):
-
-        # First 5 rows of Pascal's triangle
-        self.assertEqual(binom(0, 0), 1)
-        self.assertEqual(binom(1, 0), 1)
-        self.assertEqual(binom(1, 1), 1)
-        self.assertEqual(binom(2, 0), 1)
-        self.assertEqual(binom(2, 1), 2)
-        self.assertEqual(binom(2, 2), 1)
-        self.assertEqual(binom(3, 0), 1)
-        self.assertEqual(binom(3, 1), 3)
-        self.assertEqual(binom(3, 2), 3)
-        self.assertEqual(binom(3, 3), 1)
-        self.assertEqual(binom(4, 0), 1)
-        self.assertEqual(binom(4, 1), 4)
-        self.assertEqual(binom(4, 2), 6)
-        self.assertEqual(binom(4, 3), 4)
-        self.assertEqual(binom(4, 4), 1)
-
-        # Selected larger values
-        self.assertEqual(binom(5, 2), 10)
-        self.assertEqual(binom(7, 2), 21)
-        self.assertEqual(binom(8, 2), 28)
-        self.assertEqual(binom(8, 4), 70)
-        self.assertEqual(binom(20, 14), 38760)
 
 class TestIntegerPartitions(unittest.TestCase):
     def test_zero(self):
@@ -251,24 +225,24 @@ class TestGenerateFusedCombinations(unittest.TestCase):
     def test_basic_fusion(self):
         sublists_A = [('a',)]
         sublists_B = [('b',)]
-        expected_output = [(('a', 'b'),)]
+        expected_output = [(1,('a', 'b'),)]
         self.assertEqual(generate_fused_combinations(sublists_A, sublists_B), expected_output)
 
     def test_different_lengths(self):
         sublists_A = [('a',), ('b',)]
         sublists_B = [('x',)]
-        expected_output = [(('a', 'x'), ('b',)), (('b', 'x'), ('a',))]
+        expected_output = [(1,('a', 'x'), ('b',)), (1,('b', 'x'), ('a',))]
         self.assertEqual(generate_fused_combinations(sublists_A, sublists_B), expected_output)
 
     def test_permutation_check(self):
         sublists_A = [('a',), ('b',)]
         sublists_B = [('x',), ('y',)]
-        expected_output = [(('a', 'x'), ('b',), ('y',)),
-            (('a', 'y'), ('b',), ('x',)),
-            (('b', 'x'), ('a',), ('y',)),
-            (('b', 'y'), ('a',), ('x',)),
-            (('a', 'x'), ('b', 'y')),
-            (('a', 'y'), ('b', 'x'))]
+        expected_output = [(1,('a', 'x'), ('b',), ('y',)),
+            (1,('a', 'y'), ('b',), ('x',)),
+            (1,('b', 'x'), ('a',), ('y',)),
+            (1,('b', 'y'), ('a',), ('x',)),
+            (1,('a', 'x'), ('b', 'y')),
+            (1,('a', 'y'), ('b', 'x'))]
         result = generate_fused_combinations(sublists_A, sublists_B)
         self.assertCountEqual(result, expected_output)  # Order doesn't matter
 
@@ -286,12 +260,26 @@ class TestGenerateFusedCombinations(unittest.TestCase):
     def test_duplicate_elements(self):
         sublists_A = [('a', 'a'), ('b',)]
         sublists_B = [('x', 'x'), ('y',)]
-        expected_output = [(('a', 'a', 'x', 'x'), ('b',), ('y',)),
-             (('a', 'a', 'y'), ('b',), ('x', 'x')),
-             (('b', 'x', 'x'), ('a', 'a'), ('y',)),
-             (('b', 'y'), ('a', 'a'), ('x', 'x')),
-             (('a', 'a', 'x', 'x'), ('b', 'y')),
-             (('a', 'a', 'y'), ('b', 'x', 'x'))]
+        expected_output = [(1,('a', 'a', 'x', 'x'), ('b',), ('y',)),
+             (1,('a', 'a', 'y'), ('b',), ('x', 'x')),
+             (1,('b', 'x', 'x'), ('a', 'a'), ('y',)),
+             (1,('b', 'y'), ('a', 'a'), ('x', 'x')),
+             (1,('a', 'a', 'x', 'x'), ('b', 'y')),
+             (1,('a', 'a', 'y'), ('b', 'x', 'x'))]
+        result = generate_fused_combinations(sublists_A, sublists_B)
+        self.assertCountEqual(result, expected_output)
+        
+    def test_simple_reduction(self):
+        sublists_A = [('a', 'a'), ('a',),('a',)]
+        sublists_B = [('x', 'x'), ('x',)]
+        expected_output = [(1, ('a', 'a', 'x', 'x'), ('a',), ('a',), ('x',)),
+            (1, ('a', 'a', 'x'), ('a',), ('a',), ('x', 'x')),
+            (2, ('a', 'x', 'x'), ('a', 'a'), ('a',), ('x',)),
+            (2, ('a', 'x'), ('a', 'a'), ('a',), ('x', 'x')),
+            (2, ('a', 'a', 'x', 'x'), ('a', 'x'), ('a',)),
+            (2, ('a', 'a', 'x'), ('a', 'x', 'x'), ('a',)),
+            (1, ('a', 'x', 'x'), ('a', 'x'), ('a', 'a')),
+            (1, ('a', 'x'), ('a', 'x', 'x'), ('a', 'a'))]
         result = generate_fused_combinations(sublists_A, sublists_B)
         self.assertCountEqual(result, expected_output)
 

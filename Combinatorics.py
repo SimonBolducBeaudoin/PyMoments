@@ -9,6 +9,7 @@ from numpy import r_,zeros,full
 
 from itertools import combinations,product,permutations,groupby
 from collections import defaultdict
+from math import perm,comb,prod
 
 from .DataStructures import growth_string_to_partition
 
@@ -112,15 +113,7 @@ def mu_partitions(set):
         for block_shape in distinct_permutations(int_partition):
            for gs in growth_string_from_blocks_shape(block_shape, set):
                yield growth_string_to_partition(gs,set)
-    
-def remove_duplicates_and_count(data):
-    count_dict = defaultdict(int)
-    for sublist in data:
-        key = tuple(sorted(sublist))
-        count_dict[key] += 1
-            # Construct the result where count is the first element
-    return [tuple([count] + list(sublist)) for sublist, count in count_dict.items()]
-    
+        
 def disjoint_product(A, B):
     result = []
     for (count_A, *partition_A), (count_B, *partition_B) in product(A, B):
@@ -129,23 +122,123 @@ def disjoint_product(A, B):
         result.append((new_count, *new_sublists))
     return result
 
+def remove_duplicates_and_count(data):
+    count_dict = defaultdict(int)
+    for sublist in data:
+        key = tuple(sorted(sublist))
+        count_dict[key] += 1
+            # Construct the result where count is the first element
+    return [tuple([count] + list(sublist)) for sublist, count in count_dict.items()]
+
+def limited_combinations(limits, k, start=0, current_counts=None):
+    """
+    A generator that yields valid combinations of length k using indexed elements,
+    where each index has a limited number of repetitions.
+    
+    The output is a tuple where each value represents how many times the corresponding element is taken.
+    """
+    if current_counts is None:
+        current_counts = [0] * len(limits)
+
+    if sum(current_counts) == k:
+        yield tuple(current_counts)
+        return
+
+    for i in range(start, len(limits)):
+        if current_counts[i] < limits[i]:
+            new_counts = current_counts[:]
+            new_counts[i] += 1
+            yield from limited_combinations(limits, k, i, new_counts)
+            
+def multi_index_to_combination(elements, multi_index):
+    """
+    Converts a multi-index into the actual combination.
+    
+    elements: List of items to choose from.
+    multi_index: Tuple representing the multiplicity of each element.
+    
+    Returns a list containing the actual combination.
+    """
+    combination = []
+    for count, element in zip(multi_index, elements):
+        combination.extend([element] * count)
+    return combination
+            
+def limited_permutations(limits, k, current_perm=None, remaining_counts=None):
+    """
+    A generator that yields valid permutations of length k using indexed elements,
+    where each index has a limited number of repetitions.
+
+    The output is a tuple representing a permutation, where each value corresponds
+    to an index being chosen.
+    """
+    if current_perm is None:
+        current_perm = []
+    if remaining_counts is None:
+        remaining_counts = list(limits)
+
+    if len(current_perm) == k:
+        yield tuple(current_perm)
+        return
+
+    for i in range(len(limits)):
+        if remaining_counts[i] > 0:
+            remaining_counts[i] -= 1
+            yield from limited_permutations(limits, k, current_perm + [i], remaining_counts)
+            remaining_counts[i] += 1  # Backtrack
+            
+def index_to_permutation(elements,perm_index):
+  return [elements[i] for i in perm_index] 
+      
+def reduce_partitions(partition):
+    """
+    Counts the identical block and reduces the representation.
+    """
+    counts = []
+    red_part = []
+    for key, group in groupby(partition):
+        counts   += ( len(list(group)) ,)
+        red_part += ( tuple(key) ,)
+    return counts,red_part
+    
+def count_occurrences(data: tuple, max_value: int) -> tuple:
+    """Counts occurrences of each value from 0 to max_value-1 in the given tuple."""
+    counts = [0] * max_value  # Initialize a list of zeros
+    
+    for num in data:
+        if 0 <= num < max_value:  # Ensure values are within range
+            counts[num] += 1
+    
+    return tuple(counts)
+    
 def generate_fused_combinations(partition_A, partition_B):
-    """Generates all valid fusions of elements from partition_A and partition_B, using indices and permutations for partition_B."""
+    """
+    Generates all valid unions of elements from partition_A and partition_B, using indices and permutations for partition_B.
+    """
     min_len = min(len(partition_A), len(partition_B))
     fused_results = []
-
+    
+    red_count_A,partition_red_A = reduce_partitions(partition_A)
+    red_count_B,partition_red_B = reduce_partitions(partition_B)
+    
     # Try fusing 1 to min_len elements together using indices
     for i in range(1, min_len + 1):
-        for idx_comb_A in combinations(range(len(partition_A)), i):
-            remaining_A = [partition_A[idx] for idx in range(len(partition_A)) if idx not in idx_comb_A]    
-            for idx_perm_B in permutations(range(len(partition_B)), i):
+        for idx_comb_A in limited_combinations(red_count_A, i): 
+            comb_A      = multi_index_to_combination( partition_red_A,idx_comb_A )
+            rem_idx_A = [i-j for i,j in zip(red_count_A,idx_comb_A)]
+            remaining_A = multi_index_to_combination( partition_red_A, rem_idx_A )
+            multiplicity_A = prod([comb(n,k) for n,k in zip(red_count_A,idx_comb_A)])
+            for idx_perm_B in limited_permutations(red_count_B, i):
+                perm_B = index_to_permutation(partition_red_B,idx_perm_B)
+                idx_comb_B = count_occurrences(idx_perm_B,len(partition_red_B))
+                rem_idx_B = [i-j for i,j in zip(red_count_B,idx_comb_B)]
+                remaining_B = multi_index_to_combination( partition_red_B, rem_idx_B )
+                multiplicity_B = prod([perm(n,k) for n,k in zip(red_count_B,idx_comb_B)])
                 # Fuse the elements corresponding to the indices
-                fused = [tuple(sorted(partition_A[i_a] + partition_B[i_b])) for i_a, i_b in zip(idx_comb_A, idx_perm_B)]    
-                # Keep remaining untouched elements
-                remaining_B = [partition_B[idx] for idx in range(len(partition_B)) if idx not in idx_perm_B]
+                fused = [tuple(sorted(a+b)) for a, b in zip(comb_A, perm_B)]    
                 # Construct new sublist arrangement
                 new_sublists = tuple(fused + remaining_A + remaining_B)
-                fused_results.append(new_sublists)
+                fused_results.append((multiplicity_A*multiplicity_B,*new_sublists))
     return fused_results
     
 def conjoint_product(A, B):
@@ -155,8 +248,9 @@ def conjoint_product(A, B):
         # Generate all fused combinations
         fused_combinations = generate_fused_combinations(partition_A, partition_B)
         # Store each valid combination in the result list
-        for new_sublists in fused_combinations:
-            result.append((new_count, *new_sublists))
+        for sublists in fused_combinations:
+            multiplicity = sublists[0]
+            result.append((new_count*multiplicity, *sublists[1:]))
     return result
     
 def partitions_composition(A, B):
