@@ -117,7 +117,9 @@ class cumulants_to_moment(_to_moment):
     [1, (0,), (1,)]
     """
     def next_term(self):
-        return [1] + next(self.gen)
+        # Number followed by a tuples
+        nxt = next(self.gen)
+        return [1*nxt[0]] + list(nxt[1:])
     def next_term_latex(self):
         return super().next_term_latex(var="\kappa")
                
@@ -126,7 +128,8 @@ class cumulants_to_mu(_to_centered_moment):
     Same as cumulants_to_moment but for centered moments
     """
     def next_term(self):    
-        return [1] + next(self.gen)
+        nxt = next(self.gen)
+        return [1*nxt[0]] + list(nxt[1:])
     def next_term_latex(self):
         return super().next_term_latex(var="\kappa")
                 
@@ -184,10 +187,11 @@ class moments_to_cumulant(_to_moment):
     """
     
     def next_term(self):
+        # A number followed by tuples
         nxt = next(self.gen)
-        pi = len(nxt)
-        coef = (-1)**(pi-1)*factorial(pi-1)
-        return [coef] + nxt
+        pi = len(nxt[1:])
+        coef = (-1)**(pi-1)*factorial(pi-1) * nxt[0]
+        return [coef] + list(nxt[1:])
     def next_term_latex(self):
         return super().next_term_latex(var="m")
         
@@ -196,9 +200,10 @@ class mus_to_cumulant(_to_centered_moment):
     Same as moments_to_cumulant but for centered moments
     """
     def next_term(self):
+        # A number followed by tuples
         nxt = next(self.gen)
-        pi = len(nxt)
-        coef = (-1)**(pi-1)*factorial(pi-1)
-        return [coef] + nxt
+        pi = len(nxt[1:])
+        coef = (-1)**(pi-1)*factorial(pi-1) * nxt[0]
+        return [coef] + list(nxt[1:])
     def next_term_latex(self):
         return super().next_term_latex(var="\mu")
