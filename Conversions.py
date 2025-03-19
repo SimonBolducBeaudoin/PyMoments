@@ -76,7 +76,7 @@ class _to_moment(_conversion_base):
         if len(self.multiset_in) == 0:
             self.gen = iter([])
         else :
-        self.gen = set_partitions(self.multiset_in)
+            self.gen = set_partitions(self.multiset_in)
         
 class _to_centered_moment(_conversion_base):
     def __init__(self,*args,**kwargs):
@@ -84,10 +84,10 @@ class _to_centered_moment(_conversion_base):
         if len(self.multiset_in) == 0:
             self.gen = iter([])
         else :
-        self.gen = mu_partitions(self.multiset_in)
+            self.gen = mu_partitions(self.multiset_in)
                           
 class cumulants_to_moment(_to_moment):
-    """
+    r"""
     This class implements Equation (1.3) from K.D. Smith:
 
     .. math::
@@ -143,7 +143,7 @@ class cumulants_to_moment(_to_moment):
         nxt = next(self.gen)
         return [1*nxt[0]] + list(nxt[1:])
     def next_term_latex(self):
-        return super().next_term_latex(var="\kappa")
+        return super().next_term_latex(var=r"\kappa")
                
 class cumulants_to_mu(_to_centered_moment):
     """
@@ -153,10 +153,10 @@ class cumulants_to_mu(_to_centered_moment):
         nxt = next(self.gen)
         return [1*nxt[0]] + list(nxt[1:])
     def next_term_latex(self):
-        return super().next_term_latex(var="\kappa")
+        return super().next_term_latex(var=r"\kappa")
                 
 class moments_to_cumulant(_to_moment):
-    """
+    r"""
     This class implements Equation (1.6) from K.D. Smith:
 
     .. math::
@@ -228,4 +228,4 @@ class mus_to_cumulant(_to_centered_moment):
         coef = (-1)**(pi-1)*factorial(pi-1) * nxt[0]
         return [coef] + list(nxt[1:])
     def next_term_latex(self):
-        return super().next_term_latex(var="\mu")
+        return super().next_term_latex(var=r"\mu")
