@@ -90,31 +90,7 @@ def _set_partitions_slow(set):
                 new_part = (head,) + part
                 yield tail_parts[:i] + [new_part] + tail_parts[i + 1:]
             yield [(head,)] + tail_parts
-            
-class _mu_partitions_slow:
-    def __init__(self, set):
-        self.gen = _set_partitions_slow(set)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        # looking for either the generator to end or 
-        # the next list of tuple with no
-        while True :
-            this_tpl_good = True
-            nxt = next(self.gen)
-            if nxt is None:
-                raise StopIteration
-            # checks if one of the elements has lenght 1.
-            for idx_tpl in nxt :
-                if len(idx_tpl)==1 :
-                    this_tpl_good = False
-                    break
-            if this_tpl_good : 
-                break 
-        return nxt
-        
+                    
 def disjoint_product(A, B):
     result = []
     for (count_A, *partition_A), (count_B, *partition_B) in product(A, B):
@@ -277,28 +253,20 @@ def set_partitions(set):
         current_multiset = partitions_composition(current_multiset, next_multiset)
 
     return iter(current_multiset)
-    
-def mu_partitions(set):
-    def filter_tuples(data: list) -> list:
-        """Removes tuples containing at least one block of length 1."""
-        return [tup for tup in data if all(len(block) != 1 for block in tup[1:])]
-    
-    if len(set) == 0:
-        return []
-    
-    set = sorted(set)  # Ensure order
-    
-    # Group identical elements together
-    groups = [list(group) for _, group in groupby(set)]
-    
-    # Initialize result with partitions of the first group
-    current_multiset = remove_duplicates_and_count(_set_partitions_slow(groups[0]))
-
-    for i in range(1, len(groups)):
-        next_multiset = remove_duplicates_and_count(_set_partitions_slow(groups[i]))
-        current_multiset = partitions_composition(current_multiset, next_multiset)
         
-    return filter_tuples(current_multiset)
+def mu_partitions(set):
+    if len(set) == 0:
+        return
+    else :
+        gen = set_partitions(set)  # Assuming set_partitions is a function that returns a generator
+        while True:
+            nxt = next(gen, None)  # Get the next element or None if generator is exhausted
+            if nxt is None:
+                break  # End the loop if generator is exhausted
+            
+            # Check if one of the elements has length 1
+            if all(len(idx_tpl) != 1 for idx_tpl in nxt[1:]):
+                yield nxt  # Yield the valid tuple
             
 def ff(n, i):
     """
