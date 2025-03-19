@@ -73,11 +73,17 @@ class _conversion_base:
 class _to_moment(_conversion_base):
     def __init__(self, *args,**kwargs):
         super().__init__(*args,**kwargs)
+        if len(self.multiset_in) == 0:
+            self.gen = iter([])
+        else :
         self.gen = set_partitions(self.multiset_in)
         
 class _to_centered_moment(_conversion_base):
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
+        if len(self.multiset_in) == 0:
+            self.gen = iter([])
+        else :
         self.gen = mu_partitions(self.multiset_in)
                           
 class cumulants_to_moment(_to_moment):
