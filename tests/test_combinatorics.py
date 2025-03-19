@@ -191,29 +191,29 @@ class TestIntegerPartitions(unittest.TestCase):
 class TestMuPartitions(unittest.TestCase):
     def test_empty_set(self):
         """mu_partitions should return nothing for an empty set."""
-        partitions = mu_partitions([])
+        partitions = list(mu_partitions([]))
         self.assertEqual(partitions, [])
 
     def test_single_element(self):
         """mu_partitions should return nothing for a single-element set."""
-        partitions = mu_partitions(("A"))
+        partitions = list(mu_partitions(("A")))
         self.assertEqual(partitions, [])
 
     def test_two_elements(self):
         """mu_partitions should return a single partition: both elements together."""
-        partitions = mu_partitions(("A", "B"))
+        partitions = list(mu_partitions(("A", "B")))
         expected = [(1, ('A', 'B'))]  # Example expected output (assuming binary representation)
         self.assertEqual(partitions, expected)
 
     def test_three_elements(self):
         """mu_partitions should remove partitions that contain singletons."""
-        partitions = mu_partitions(("A", "B", "C"))
+        partitions = list(mu_partitions(("A", "B", "C")))
         expected=[(1, ('A', 'B', 'C'))]
         self.assertEqual(partitions, expected)
 
     def test_four_elements(self):
         """mu_partitions should generate correct partitions for four elements."""
-        partitions = mu_partitions(("A", "B", "C", "D"))
+        partitions = list(mu_partitions(("A", "B", "C", "D")))
         # Check that none of the partitions contain singleton blocks
         expected = [(1, ('C', 'D'), ('A', 'B')),
              (1, ('B', 'D'), ('A', 'C')),
@@ -357,7 +357,7 @@ class TestSetPartitionsSymmetries(unittest.TestCase):
     def check_partition_consistency(self, set_input):
         """Helper function to check partition consistency for different test cases."""
         # Generate partitions using both methods
-        partitions_symmetries_result = set_partitions(set_input)
+        partitions_symmetries_result = list(set_partitions(set_input))
         partitions_result = list(_set_partitions_slow(tuple(set_input)))
 
         # Check sum of repetitions
