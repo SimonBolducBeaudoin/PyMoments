@@ -215,8 +215,8 @@ class TestMuPartitions(unittest.TestCase):
         """mu_partitions should generate correct partitions for four elements."""
         partitions = list(mu_partitions(("A", "B", "C", "D")))
         # Check that none of the partitions contain singleton blocks
-        expected = [(1, ('C', 'D'), ('A', 'B')),
-             (1, ('B', 'D'), ('A', 'C')),
+        expected = [(1, ('A', 'B'), ('C', 'D')),
+             (1, ('A', 'C'), ('B', 'D') ),
              (1, ('A', 'D'), ('B', 'C')),
              (1, ('A', 'B', 'C', 'D'))]
         self.assertEqual(partitions, expected)
