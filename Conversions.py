@@ -8,6 +8,12 @@ from math import factorial
 class _conversion_base:
     def __new__(cls, *args, as_iterator=False, **kwargs):
         """Decides whether to return an iterator or a list."""
+        
+        valid_kwargs = {'multiset','LaTex','multi_index_in','multi_index_out'}
+        invalid_kwargs = set(kwargs) - valid_kwargs
+        if invalid_kwargs:
+            raise TypeError(f"__new__() got unexpected keyword arguments: {invalid_kwargs}")
+        
         instance = super().__new__(cls)  # Create instance normally
         if as_iterator:
             return instance  # Return the iterator
@@ -15,7 +21,12 @@ class _conversion_base:
             instance.__init__(*args, **kwargs)  # Explicitly call __init__
             return list(instance)  # Collect all elements into a list
     def __init__(self,multiset,LaTex=False,multi_index_in=False,multi_index_out=False,**kwargs):
-        self.multiset_in = multiset if not(multi_index_in) else multi_idxs_to_multiset(multiset)
+        
+        valid_kwargs = {'as_iterator'}
+        invalid_kwargs = set(kwargs) - valid_kwargs
+        if invalid_kwargs:
+            raise TypeError(f"__new__() got unexpected keyword arguments: {invalid_kwargs}")
+        
         self._LaTex=LaTex
         self._multi_index=multi_index_out
     def __iter__(self):
