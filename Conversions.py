@@ -27,6 +27,11 @@ class _conversion_base:
         if invalid_kwargs:
             raise TypeError(f"__new__() got unexpected keyword arguments: {invalid_kwargs}")
         
+        if multi_index_in :
+            self.multiset_in = multi_idxs_to_multiset(multiset)
+            self.Ndim = len(multiset)
+        else : 
+            self.multiset_in = multiset 
         self._LaTex=LaTex
         self._multi_index=multi_index_out
     def __iter__(self):
@@ -35,7 +40,7 @@ class _conversion_base:
         if self._multi_index :
             nxt = self.next_term()
             coef = nxt[0]
-            mltset = partition_of_multi_indices(nxt[1:])
+            mltset = partition_of_multi_indices(nxt[1:],self.Ndim)
             return [coef,mltset]
         else :
             return self.next_term()
