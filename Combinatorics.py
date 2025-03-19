@@ -276,7 +276,7 @@ def set_partitions(set):
         next_multiset = remove_duplicates_and_count(_set_partitions_slow(groups[i]))
         current_multiset = partitions_composition(current_multiset, next_multiset)
 
-    return current_multiset
+    return iter(current_multiset)
     
 def mu_partitions(set):
     def filter_tuples(data: list) -> list:
