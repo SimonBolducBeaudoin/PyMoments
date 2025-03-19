@@ -99,14 +99,6 @@ def disjoint_product(A, B):
         result.append((new_count, *new_sublists))
     return result
 
-def remove_duplicates_and_count(data):
-    count_dict = defaultdict(int)
-    for sublist in data:
-        key = tuple(sorted(sublist))
-        count_dict[key] += 1
-            # Construct the result where count is the first element
-    return [tuple([count] + list(sublist)) for sublist, count in count_dict.items()]
-
 def limited_combinations(limits, k, start=0, current_counts=None):
     """
     A generator that yields valid combinations of length k using indexed elements,
@@ -166,6 +158,17 @@ def limited_permutations(limits, k, current_perm=None, remaining_counts=None):
             
 def index_to_permutation(elements,perm_index):
   return [elements[i] for i in perm_index] 
+
+def remove_duplicates_and_count(set):
+    """
+    Count the repeating elements of a set or multiset and converts it to (number, (element))
+    """
+    count_dict = defaultdict(int)
+    for sublist in set:
+        key = tuple(sorted(sublist))
+        count_dict[key] += 1
+            # Construct the result where count is the first element
+    return [tuple([count] + list(sublist)) for sublist, count in count_dict.items()]
       
 def reduce_partitions(partition):
     """
@@ -178,14 +181,25 @@ def reduce_partitions(partition):
         red_part += ( tuple(key) ,)
     return counts,red_part
     
+def sum_duplicates(input_list):
+    """
+    Reduces the (number, *elements ) representation by summing over identical elements
+    """
+    result_dict = defaultdict(int)
+    for num, *tuples in input_list:
+        
+        sorted_tuples = tuple(sorted(tuples))
+        result_dict[sorted_tuples] += num
+    result_list = [(num, *key) for key, num in result_dict.items()]
+    
+    return result_list
+    
 def count_occurrences(data: tuple, max_value: int) -> tuple:
     """Counts occurrences of each value from 0 to max_value-1 in the given tuple."""
     counts = [0] * max_value  # Initialize a list of zeros
-    
     for num in data:
         if 0 <= num < max_value:  # Ensure values are within range
             counts[num] += 1
-    
     return tuple(counts)
     
 def generate_fused_combinations(partition_A, partition_B):
@@ -252,6 +266,7 @@ def set_partitions(set):
         next_multiset = remove_duplicates_and_count(_set_partitions_slow(groups[i]))
         current_multiset = partitions_composition(current_multiset, next_multiset)
 
+        current_multiset = sum_duplicates(current_multiset)
     return iter(current_multiset)
         
 def mu_partitions(set):
