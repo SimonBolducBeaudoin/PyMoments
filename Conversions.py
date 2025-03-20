@@ -41,7 +41,7 @@ class _conversion_base:
             nxt = self.next_term()
             coef = nxt[0]
             mltset = partition_of_multi_indices(nxt[1:],self.Ndim)
-            return [coef,mltset]
+            return (coef,*mltset)
         else :
             return self.next_term()
     def next_term_latex(self,var="x"):
@@ -141,7 +141,7 @@ class cumulants_to_moment(_to_moment):
     def next_term(self):
         # Number followed by a tuples
         nxt = next(self.gen)
-        return [1*nxt[0]] + list(nxt[1:])
+        return (1*nxt[0],) + nxt[1:]
     def next_term_latex(self):
         return super().next_term_latex(var=r"\kappa")
                
@@ -151,7 +151,7 @@ class cumulants_to_mu(_to_centered_moment):
     """
     def next_term(self):    
         nxt = next(self.gen)
-        return [1*nxt[0]] + list(nxt[1:])
+        return (1*nxt[0],) + nxt[1:]
     def next_term_latex(self):
         return super().next_term_latex(var=r"\kappa")
                 
@@ -213,7 +213,7 @@ class moments_to_cumulant(_to_moment):
         nxt = next(self.gen)
         pi = len(nxt[1:])
         coef = (-1)**(pi-1)*factorial(pi-1) * nxt[0]
-        return [coef] + list(nxt[1:])
+        return (coef,) + nxt[1:]
     def next_term_latex(self):
         return super().next_term_latex(var="m")
         
@@ -226,6 +226,6 @@ class mus_to_cumulant(_to_centered_moment):
         nxt = next(self.gen)
         pi = len(nxt[1:])
         coef = (-1)**(pi-1)*factorial(pi-1) * nxt[0]
-        return [coef] + list(nxt[1:])
+        return (coef,) + nxt[1:]
     def next_term_latex(self):
         return super().next_term_latex(var=r"\mu")
