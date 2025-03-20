@@ -22,10 +22,7 @@ class TestCumulantsToMoment(unittest.TestCase):
         
         # Example input: (0, 1)
         terms = cumulants_to_moment((0, 1))
-        expected_terms = [
-            [1, (0,), (1,)],  # Second term: corresponds to <X_0> <X_1>
-            [1, (0, 1)]       # First term: corresponds to <X_0 X_1>
-        ]
+        expected_terms = [(1, (0,), (1,)), (1, (0, 1))]
         
         # Check if the output matches the expected terms
         self.assertEqual(terms, expected_terms)
@@ -40,8 +37,8 @@ class TestCumulantsToMoment(unittest.TestCase):
         first_term = next(it)
         second_term = next(it)
         
-        self.assertEqual(first_term , [1, (0,), (1,)])
-        self.assertEqual(second_term, [1, (0, 1)]    )
+        self.assertEqual(first_term , (1, (0,), (1,)))
+        self.assertEqual(second_term, (1, (0, 1))    )
         
         # Ensure that the iterator raises StopIteration after yielding all terms
         with self.assertRaises(StopIteration):
@@ -60,16 +57,12 @@ class TestCumulantsToMoment(unittest.TestCase):
             next(it)
 
     def test_multiple_terms(self):
-        # Test input with more complex structure
-        
-        # Example input: (0, 1, 2)
         terms = cumulants_to_moment((0, 1, 2))
-        expected_terms = [[1, (0,), (1,), (2,)],
-            [1, (0, 1), (2,)],
-            [1, (0, 2), (1,)],
-            [1, (0,), (1, 2)],
-            [1, (0, 1, 2)]]
-        
+        expected_terms = [(1, (0,), (1,), (2,)),
+            (1, (0, 1), (2,)),
+            (1, (0, 2), (1,)),
+            (1, (0,), (1, 2)),
+            (1, (0, 1, 2))]        
         self.assertEqual(terms, expected_terms)
         
     def test_all_1d_cumulants_to_moment_on_wiki(self):
@@ -77,47 +70,47 @@ class TestCumulantsToMoment(unittest.TestCase):
         This one uses multi_index notation
         """
         terms = cumulants_to_moment((1,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(1,)]]]
+        expected_terms = [(1, (1,))]
         self.assertEqual(terms, expected_terms)
         
         terms = cumulants_to_moment((2,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(2,)]], [1, [(1,), (1,)]]]
+        expected_terms = [(1, (2,)), (1, (1,), (1,))]
         self.assertEqual(terms, expected_terms)
         
         terms = cumulants_to_moment((3,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(3,)]], [3, [(1,), (2,)]], [1, [(1,), (1,), (1,)]]]
+        expected_terms = [(1, (3,)), (3, (1,), (2,)), (1, (1,), (1,), (1,))]
         self.assertEqual(terms, expected_terms)
         
         terms = cumulants_to_moment((4,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(4,)]],
-            [4, [(1,), (3,)]],
-            [3, [(2,), (2,)]],
-            [6, [(1,), (1,), (2,)]],
-            [1, [(1,), (1,), (1,), (1,)]]]
+        expected_terms = [(1, (4,)),
+            (4, (1,), (3,)),
+            (3, (2,), (2,)),
+            (6, (1,), (1,), (2,)),
+            (1, (1,), (1,), (1,), (1,))]
         self.assertEqual(terms, expected_terms)
         
         terms = cumulants_to_moment((5,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(5,)]],
-            [5, [(1,), (4,)]],
-            [10, [(2,), (3,)]],
-            [10, [(1,), (1,), (3,)]],
-            [15, [(1,), (2,), (2,)]],
-            [10, [(1,), (1,), (1,), (2,)]],
-            [1, [(1,), (1,), (1,), (1,), (1,)]]]
+        expected_terms = [(1, (5,)),
+            (5, (1,), (4,)),
+            (10, (2,), (3,)),
+            (10, (1,), (1,), (3,)),
+            (15, (1,), (2,), (2,)),
+            (10, (1,), (1,), (1,), (2,)),
+            (1, (1,), (1,), (1,), (1,), (1,))]
         self.assertEqual(terms, expected_terms)
         
         terms = cumulants_to_moment((6,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(6,)]],
-            [6, [(1,), (5,)]],
-            [15, [(2,), (4,)]],
-            [15, [(1,), (1,), (4,)]],
-            [10, [(3,), (3,)]],
-            [60, [(1,), (2,), (3,)]],
-            [20, [(1,), (1,), (1,), (3,)]],
-            [15, [(2,), (2,), (2,)]],
-            [45, [(1,), (1,), (2,), (2,)]],
-            [15, [(1,), (1,), (1,), (1,), (2,)]],
-            [1, [(1,), (1,), (1,), (1,), (1,), (1,)]]]
+        expected_terms = [(1, (6,)),
+            (6, (1,), (5,)),
+            (15, (2,), (4,)),
+            (15, (1,), (1,), (4,)),
+            (10, (3,), (3,)),
+            (60, (1,), (2,), (3,)),
+            (20, (1,), (1,), (1,), (3,)),
+            (15, (2,), (2,), (2,)),
+            (45, (1,), (1,), (2,), (2,)),
+            (15, (1,), (1,), (1,), (1,), (2,)),
+            (1, (1,), (1,), (1,), (1,), (1,), (1,))]
         self.assertEqual(terms, expected_terms)
         
         
@@ -128,57 +121,57 @@ class TestCumulantsToMoment(unittest.TestCase):
         Biometrika, Jun. 1951, Vol. 38, No. 1/2 (Jun., 1951), pp. 179-195
         """
         terms = cumulants_to_moment((4,0,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(4, 0)]],
-            [4, [(1, 0), (3, 0)]],
-            [3, [(2, 0), (2, 0)]],
-            [6, [(1, 0), (1, 0), (2, 0)]],
-            [1, [(1, 0), (1, 0), (1, 0), (1, 0)]]]
+        expected_terms = [(1, (4, 0)),
+            (4, (1, 0), (3, 0)),
+            (3, (2, 0), (2, 0)),
+            (6, (1, 0), (1, 0), (2, 0)),
+            (1, (1, 0), (1, 0), (1, 0), (1, 0))]
         self.assertEqual(terms, expected_terms)
         
         terms = cumulants_to_moment((2,2,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(2, 0), (0, 2)]],
-            [1, [(2, 0), (0, 1), (0, 1)]],
-            [1, [(1, 0), (1, 0), (0, 2)]],
-            [1, [(1, 0), (1, 0), (0, 1), (0, 1)]],
-            [1, [(2, 2)]],
-            [2, [(2, 1), (0, 1)]],
-            [2, [(1, 0), (1, 2)]],
-            [4, [(1, 0), (1, 1), (0, 1)]],
-            [2, [(1, 1), (1, 1)]]]
+        expected_terms = [(1, (2, 0), (0, 2)),
+            (1, (2, 0), (0, 1), (0, 1)),
+            (1, (1, 0), (1, 0), (0, 2)),
+            (1, (1, 0), (1, 0), (0, 1), (0, 1)),
+            (1, (2, 2)),
+            (2, (2, 1), (0, 1)),
+            (2, (1, 0), (1, 2)),
+            (4, (1, 0), (1, 1), (0, 1)),
+            (2, (1, 1), (1, 1))]
         self.assertEqual(terms, expected_terms)
         
         terms = cumulants_to_moment((3,3,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(3, 0), (0, 3)]],
-            [3, [(3, 0), (0, 1), (0, 2)]],
-            [1, [(3, 0), (0, 1), (0, 1), (0, 1)]],
-            [3, [(1, 0), (2, 0), (0, 3)]],
-            [9, [(1, 0), (2, 0), (0, 1), (0, 2)]],
-            [3, [(1, 0), (2, 0), (0, 1), (0, 1), (0, 1)]],
-            [1, [(1, 0), (1, 0), (1, 0), (0, 3)]],
-            [3, [(1, 0), (1, 0), (1, 0), (0, 1), (0, 2)]],
-            [1, [(1, 0), (1, 0), (1, 0), (0, 1), (0, 1), (0, 1)]],
-            [1, [(3, 3)]],
-            [3, [(3, 1), (0, 2)]],
-            [3, [(3, 2), (0, 1)]],
-            [3, [(3, 1), (0, 1), (0, 1)]],
-            [3, [(2, 0), (1, 3)]],
-            [3, [(1, 0), (2, 3)]],
-            [9, [(2, 0), (1, 1), (0, 2)]],
-            [9, [(2, 0), (1, 2), (0, 1)]],
-            [9, [(1, 0), (2, 1), (0, 2)]],
-            [9, [(1, 0), (2, 2), (0, 1)]],
-            [9, [(2, 2), (1, 1)]],
-            [9, [(2, 1), (1, 2)]],
-            [9, [(2, 0), (1, 1), (0, 1), (0, 1)]],
-            [9, [(1, 0), (2, 1), (0, 1), (0, 1)]],
-            [18, [(2, 1), (1, 1), (0, 1)]],
-            [3, [(1, 0), (1, 0), (1, 3)]],
-            [9, [(1, 0), (1, 0), (1, 1), (0, 2)]],
-            [9, [(1, 0), (1, 0), (1, 2), (0, 1)]],
-            [18, [(1, 0), (1, 1), (1, 2)]],
-            [9, [(1, 0), (1, 0), (1, 1), (0, 1), (0, 1)]],
-            [18, [(1, 0), (1, 1), (1, 1), (0, 1)]],
-            [6, [(1, 1), (1, 1), (1, 1)]]]
+        expected_terms = [(1, (3, 0), (0, 3)),
+            (3, (3, 0), (0, 1), (0, 2)),
+            (1, (3, 0), (0, 1), (0, 1), (0, 1)),
+            (3, (1, 0), (2, 0), (0, 3)),
+            (9, (1, 0), (2, 0), (0, 1), (0, 2)),
+            (3, (1, 0), (2, 0), (0, 1), (0, 1), (0, 1)),
+            (1, (1, 0), (1, 0), (1, 0), (0, 3)),
+            (3, (1, 0), (1, 0), (1, 0), (0, 1), (0, 2)),
+            (1, (1, 0), (1, 0), (1, 0), (0, 1), (0, 1), (0, 1)),
+            (1, (3, 3)),
+            (3, (3, 1), (0, 2)),
+            (3, (3, 2), (0, 1)),
+            (3, (3, 1), (0, 1), (0, 1)),
+            (3, (2, 0), (1, 3)),
+            (3, (1, 0), (2, 3)),
+            (9, (2, 0), (1, 1), (0, 2)),
+            (9, (2, 0), (1, 2), (0, 1)),
+            (9, (1, 0), (2, 1), (0, 2)),
+            (9, (1, 0), (2, 2), (0, 1)),
+            (9, (2, 2), (1, 1)),
+            (9, (2, 1), (1, 2)),
+            (9, (2, 0), (1, 1), (0, 1), (0, 1)),
+            (9, (1, 0), (2, 1), (0, 1), (0, 1)),
+            (18, (2, 1), (1, 1), (0, 1)),
+            (3, (1, 0), (1, 0), (1, 3)),
+            (9, (1, 0), (1, 0), (1, 1), (0, 2)),
+            (9, (1, 0), (1, 0), (1, 2), (0, 1)),
+            (18, (1, 0), (1, 1), (1, 2)),
+            (9, (1, 0), (1, 0), (1, 1), (0, 1), (0, 1)),
+            (18, (1, 0), (1, 1), (1, 1), (0, 1)),
+            (6, (1, 1), (1, 1), (1, 1))]
         self.assertEqual(terms, expected_terms)
         
     def test_bivariate_cumulants_to_mu_in_ref1(self):
@@ -188,11 +181,11 @@ class TestCumulantsToMoment(unittest.TestCase):
         Biometrika, Jun. 1951, Vol. 38, No. 1/2 (Jun., 1951), pp. 179-195
         """    
         terms = cumulants_to_mu((5,1,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(5, 1)]],
-            [5, [(4, 0), (1, 1)]],
-            [10, [(3, 0), (2, 1)]],
-            [10, [(2, 0), (3, 1)]],
-            [15, [(2, 0), (2, 0), (1, 1)]]]
+        expected_terms = [(1, (5, 1)),
+            (5, (4, 0), (1, 1)),
+            (10, (3, 0), (2, 1)),
+            (10, (2, 0), (3, 1)),
+            (15, (2, 0), (2, 0), (1, 1))]
         self.assertEqual(terms, expected_terms)
         
     def test_bivariate_mus_to_cumulant_in_ref1(self):
@@ -202,11 +195,11 @@ class TestCumulantsToMoment(unittest.TestCase):
         Biometrika, Jun. 1951, Vol. 38, No. 1/2 (Jun., 1951), pp. 179-195
         """    
         terms = mus_to_cumulant((5,1,),multi_index_in=True,multi_index_out=True)
-        expected_terms = [[1, [(5, 1)]],
-            [-5, [(4, 0), (1, 1)]],
-            [-10, [(3, 0), (2, 1)]],
-            [-10, [(2, 0), (3, 1)]],
-            [30, [(2, 0), (2, 0), (1, 1)]]]
+        expected_terms = [(1, (5, 1)),
+            (-5, (4, 0), (1, 1)),
+            (-10, (3, 0), (2, 1)),
+            (-10, (2, 0), (3, 1)),
+            (30, (2, 0), (2, 0), (1, 1))]
         self.assertEqual(terms, expected_terms)
         
 if __name__ == "__main__":
